@@ -1,0 +1,1061 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Uncrop</title>
+<meta name="description" content="Post the whole photo on Instagram. Uncrop adds the thinnest possible strip so nothing gets cut.">
+<meta name="theme-color" content="#F2F4F8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D111A" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Uncrop">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+:root{
+  --bg:#F2F4F8; --surface:#FFFFFF; --ink:#131926; --muted:#586379; --line:#D8DDE7;
+  --accent:#2B4DDB; --accent-ink:#FFFFFF; --accent-soft:#E6EBFD;
+  --warn:#A8460A; --warn-bg:#FDEFE2; --ok:#0A6B44; --ok-bg:#E3F3EA;
+  --check-a:#E6E9F0; --check-b:#F7F8FB; --ring:#AEB6C4;
+  --font:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
+  --mono:ui-monospace, "SF Mono", Menlo, "Roboto Mono", monospace;
+  --top:env(safe-area-inset-top,0px); --bot:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0D111A; --surface:#161C27; --ink:#E7EBF3; --muted:#9AA4B7; --line:#283043;
+  --accent:#8099FF; --accent-ink:#0D111A; --accent-soft:#1E2846;
+  --warn:#F5A866; --warn-bg:#382413; --ok:#62D59D; --ok-bg:#11301F;
+  --check-a:#1A202C; --check-b:#212836; --ring:#7E889B; color-scheme:dark}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D111A; --surface:#161C27; --ink:#E7EBF3; --muted:#9AA4B7; --line:#283043;
+  --accent:#8099FF; --accent-ink:#0D111A; --accent-soft:#1E2846;
+  --warn:#F5A866; --warn-bg:#382413; --ok:#62D59D; --ok-bg:#11301F;
+  --check-a:#1A202C; --check-b:#212836; --ring:#7E889B; color-scheme:dark}}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 var(--font);-webkit-text-size-adjust:100%;overscroll-behavior-y:none}
+[hidden]{display:none!important}
+button,select{font:inherit;color:inherit}
+.vh{position:fixed;left:0;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
+
+/* App shell: header / scrolling content / bottom action bar */
+.app{display:flex;flex-direction:column;height:100%;max-width:640px;margin:0 auto}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:calc(var(--top) + 10px) 16px 10px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;letter-spacing:-.01em}
+.brand img{width:32px;height:32px;border-radius:8px}
+.tools{display:flex;gap:8px;align-items:center}
+.pillbtn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 12px;font-size:14px;font-weight:600;cursor:pointer;min-height:40px}
+.lang{position:relative;display:flex;align-items:center}
+.lang select{appearance:none;-webkit-appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 30px 8px 34px;font-size:14px;font-weight:600;min-height:40px;cursor:pointer}
+.lang svg{position:absolute;pointer-events:none;color:var(--muted)}
+.lang .globe{left:10px}.lang .chev{right:10px}
+main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px 24px;display:flex;flex-direction:column;gap:18px}
+
+/* Welcome */
+.empty{flex:1;display:flex;flex-direction:column;justify-content:center;gap:20px;padding-block:16px}
+.empty h1{font-size:30px;line-height:1.12;letter-spacing:-.02em;margin:0;text-wrap:balance}
+.empty p{margin:0;color:var(--muted);max-width:44ch}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.steps li{display:flex;align-items:center;gap:12px;font-weight:600}
+.steps b{flex:0 0 30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-size:14px}
+.big{width:100%;border:0;border-radius:14px;padding:17px;font-size:17px;font-weight:650;background:var(--accent);color:var(--accent-ink);cursor:pointer;min-height:56px}
+.link{background:none;border:0;color:var(--accent);font-weight:600;padding:10px;cursor:pointer}
+.privacy{font-size:13px;color:var(--muted);text-align:center;margin:0}
+
+/* Preview */
+.stage{border-radius:14px;padding:14px;display:grid;place-items:center;min-height:240px;
+  background-color:var(--check-b);
+  background-image:linear-gradient(45deg,var(--check-a) 25%,transparent 25%,transparent 75%,var(--check-a) 75%),linear-gradient(45deg,var(--check-a) 25%,transparent 25%,transparent 75%,var(--check-a) 75%);
+  background-size:18px 18px;background-position:0 0,9px 9px}
+#preview{max-width:100%;max-height:46vh;width:auto;height:auto;display:block;border-radius:2px;box-shadow:0 6px 22px rgb(0 0 0 / .2)}
+.verdict{display:flex;gap:12px;align-items:flex-start;border-radius:12px;padding:12px 14px;background:var(--ok-bg);color:var(--ok);font-weight:600;font-size:15px}
+.verdict svg{flex:0 0 22px;margin-top:1px}
+.verdict small{display:block;font-weight:400;color:var(--muted);font-family:var(--mono);font-size:12px;margin-top:3px;font-variant-numeric:tabular-nums}
+.removeRow{display:flex;justify-content:flex-end;margin-top:-8px}
+.removeRow button{background:none;border:0;color:var(--muted);font-size:14px;padding:6px 0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+/* File strip */
+.lbl{font-size:12px;font-weight:650;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.group{display:flex;flex-direction:column;gap:10px}
+.strip{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
+.thumb{position:relative;flex:0 0 74px;height:74px;border-radius:12px;overflow:hidden;border:3px solid transparent;padding:0;background:var(--surface);cursor:pointer}
+.thumb.sel{border-color:var(--accent)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .badge{position:absolute;left:4px;bottom:4px;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:99px;background:rgb(0 0 0 / .62);color:#fff}
+.thumb .badge.done{background:#0A6B44}.thumb .badge.err{background:#A8460A}
+.thumb .play{position:absolute;right:4px;top:4px;font-size:10px;color:#fff;background:rgb(0 0 0 / .55);border-radius:4px;padding:0 4px}
+.add{flex:0 0 74px;height:74px;border-radius:12px;border:2px dashed var(--line);background:none;color:var(--muted);font-size:28px;cursor:pointer}
+
+/* Choices */
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 14px;font-size:15px;line-height:1.2;display:flex;align-items:center;gap:10px;cursor:pointer;min-height:48px}
+.seg label small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.seg input:checked + label{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.seg input:focus-visible + label{outline:2px solid var(--accent);outline-offset:2px}
+/* Strip color: three equal tiles in one row */
+.colors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.colors label{flex-direction:column;justify-content:center;gap:8px;text-align:center;padding:12px 6px;min-height:84px;min-width:0;overflow-wrap:anywhere}
+.seg input:disabled + label{opacity:.45;cursor:not-allowed}
+.sw{flex:0 0 auto;width:28px;height:28px;border-radius:50%;box-shadow:0 0 0 1.5px var(--ring)}
+.sw.white{background:#fff}.sw.black{background:#000}
+.sw.auto{background:linear-gradient(135deg,#fff 50%,#000 50%)}
+.sw.ai{background:conic-gradient(from 200deg,#f0846b,#f9d29d,#86c5a8,#5b7bd5,#b07ad9,#f0846b);display:grid;place-items:center;color:#fff;font-size:14px;font-style:normal;text-shadow:0 1px 2px rgb(0 0 0 / .4)}
+.sheet .row2{display:flex;gap:8px}.sheet .row2 button{flex:1}
+details{border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+summary{cursor:pointer;padding:14px 16px;font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:20px;color:var(--muted)}
+details[open] summary::after{content:"−"}
+details .inner{padding:0 16px 16px;display:flex;flex-direction:column;gap:16px}
+.note{font-size:13px;color:var(--muted);margin:0}
+
+/* After saving: Instagram tip */
+.tip{border-radius:12px;padding:14px 16px;background:var(--accent-soft);display:flex;flex-direction:column;gap:4px}
+.tip b{font-size:15px}.tip span{font-size:14px;color:var(--muted)}
+
+/* Bottom bar */
+.bottom{padding:12px 16px calc(var(--bot) + 12px);background:var(--bg);border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.progress{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.progress i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+.status{font-size:14px;color:var(--muted);min-height:1.2em;text-align:center}
+.status.err{color:var(--warn)}
+.btns{display:flex;gap:8px}
+.btns button{flex:1}
+.ghost{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:15px;font-size:16px;font-weight:600;cursor:pointer;min-height:56px}
+button:disabled{opacity:.5;cursor:not-allowed}
+button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Home Screen sheet (iPhone) */
+.sheet{position:fixed;inset:0;background:rgb(0 0 0 / .45);display:flex;align-items:flex-end;justify-content:center;z-index:10}
+.sheet > div{background:var(--surface);width:100%;max-width:640px;border-radius:18px 18px 0 0;padding:20px 20px calc(var(--bot) + 20px);display:flex;flex-direction:column;gap:12px}
+.sheet h2{margin:0;font-size:20px}
+.sheet ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+@media (prefers-reduced-motion: reduce){.progress i{transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand"><img src="icons/icon-192.png" alt="">Uncrop</div>
+    <div class="tools">
+      <label class="lang">
+        <svg class="globe" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>
+        <select id="langSel" data-i18n-aria="language"></select>
+        <svg class="chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </label>
+      <button class="pillbtn" id="installBtn" data-i18n="install" hidden>Install</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Welcome -->
+    <section class="empty" id="empty">
+      <h1 data-i18n="h1">Post the whole photo. Nothing cut off.</h1>
+      <p data-i18n="intro"></p>
+      <ol class="steps">
+        <li><b>1</b><span data-i18n="step1"></span></li>
+        <li><b>2</b><span data-i18n="step2"></span></li>
+        <li><b>3</b><span data-i18n="step3"></span></li>
+      </ol>
+      <button class="big" id="pickFirst" data-i18n="choose"></button>
+      <button class="link" id="tryDemo" data-i18n="try_example"></button>
+      <p class="privacy" data-i18n="privacy"></p>
+    </section>
+
+    <!-- Workspace -->
+    <section id="work" hidden style="display:flex;flex-direction:column;gap:18px">
+      <div class="stage"><canvas id="preview" width="400" height="500" data-i18n-aria="preview_label"></canvas></div>
+      <div class="removeRow"><button id="removeBtn" data-i18n="remove"></button></div>
+
+      <div class="group">
+        <div class="lbl" id="queueLbl"></div>
+        <div class="strip" id="strip"></div>
+      </div>
+
+      <div class="group">
+        <div class="lbl" data-i18n="color"></div>
+        <div class="seg colors">
+          <input type="radio" name="bg" id="bg-ai" value="ai"><label for="bg-ai"><i class="sw ai">✦</i><span data-i18n="ai"></span></label>
+          <input type="radio" name="bg" id="bg-auto" value="auto" checked><label for="bg-auto"><i class="sw auto"></i><span data-i18n="auto"></span></label>
+          <input type="radio" name="bg" id="bg-white" value="white"><label for="bg-white"><i class="sw white"></i><span data-i18n="white"></span></label>
+          <input type="radio" name="bg" id="bg-black" value="black"><label for="bg-black"><i class="sw black"></i><span data-i18n="black"></span></label>
+        </div>
+        <p class="note" id="autoHint"></p>
+        <p class="note" id="aiNote" data-i18n="ai_unavailable" hidden></p>
+      </div>
+
+      <p class="note" id="videoNote" data-i18n="video_note" hidden></p>
+
+      <details>
+        <summary data-i18n="more"></summary>
+        <div class="inner">
+          <div class="group">
+            <div class="lbl" data-i18n="size"></div>
+            <div class="seg">
+              <input type="radio" name="res" id="res-orig" value="orig" checked><label for="res-orig"><span><span data-i18n="size_orig"></span><small data-i18n="size_orig_hint"></small></span></label>
+              <input type="radio" name="res" id="res-1080" value="1080"><label for="res-1080"><span><span data-i18n="size_1080"></span><small data-i18n="size_1080_hint"></small></span></label>
+            </div>
+          </div>
+          <div class="group">
+            <div class="lbl" data-i18n="ftype"></div>
+            <div class="seg">
+              <input type="radio" name="fmt" id="fmt-jpg" value="jpg" checked><label for="fmt-jpg"><span>JPEG<small data-i18n="jpeg_hint"></small></span></label>
+              <input type="radio" name="fmt" id="fmt-png" value="png"><label for="fmt-png"><span>PNG<small data-i18n="png_hint"></small></span></label>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <div class="tip" id="tip" hidden><b data-i18n="tip_title"></b><span data-i18n="tip_body"></span></div>
+    </section>
+  </main>
+
+  <div class="bottom" id="bottom" hidden>
+    <div class="progress" id="prog" hidden><i></i></div>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+    <div class="btns">
+      <button class="ghost" id="cancelBtn" data-i18n="cancel" hidden></button>
+      <button class="big" id="goBtn"></button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="file" accept="image/*,video/*" multiple class="vh">
+
+<div class="sheet" id="aiSheet" hidden>
+  <div>
+    <h2 data-i18n="ai_dl_title"></h2>
+    <p data-i18n="ai_dl_body" style="margin:0;color:var(--muted)"></p>
+    <div class="row2">
+      <button class="ghost" id="aiNo" data-i18n="not_now"></button>
+      <button class="big" id="aiYes" data-i18n="ai_dl_ok"></button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="iosSheet" hidden>
+  <div>
+    <h2 data-i18n="ios_title"></h2>
+    <ol>
+      <li data-i18n="ios1"></li>
+      <li data-i18n="ios2"></li>
+      <li data-i18n="ios3"></li>
+    </ol>
+    <button class="big" id="iosClose" data-i18n="got_it"></button>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+
+  // ================= Languages =================
+  const LANGS = [["en", "English"], ["es", "Español"], ["pt", "Português"], ["fr", "Français"], ["de", "Deutsch"], ["it", "Italiano"]];
+  const I18N = {
+    en: {
+      ai: "AI fill", ai_hint: "AI fill: paints what the rest of the scene would look like. Runs on your phone, free.", ai_unavailable: "AI fill works in the installed app, not in this preview.", ai_dl_title: "Download the AI once", ai_dl_body: "AI fill needs a one-time download of about 200 MB. Use Wi-Fi. After that it works offline.", ai_dl_ok: "Download", not_now: "Not now", ai_downloading: "Downloading the AI… {p}%", ai_loading: "Starting the AI…", ai_filling: "AI is filling in the edges ({k} of {n})…", ai_video: "AI is preparing the video edges ({k} of {n})…", ai_failed: "The AI couldn't run on this phone, so a plain strip was used.", ai_declined: "Pick another strip color, or download the AI to use AI fill.",
+      install: "Install", language: "Language",
+      h1: "Post the whole photo. Nothing cut off.",
+      intro: "Instagram cuts photos and videos that are too tall or too wide. Uncrop adds the thinnest possible strip so everything shows. Your picture is never cut, stretched or blurred.",
+      step1: "Choose photos or videos", step2: "Tap Convert", step3: "Save and post",
+      choose: "Choose photos or videos", try_example: "Try it with an example photo",
+      privacy: "Everything happens on your phone. Nothing is uploaded.",
+      preview_label: "Preview", remove: "Remove this file", add_more: "Add more files",
+      files: { one: "Your file", other: "Your files ({n})" },
+      color: "Strip color", auto: "Automatic", auto_light: "white, like light mode", auto_dark: "black, like dark mode", white: "White", black: "Black",
+      more: "More options", size: "Size", size_orig: "Original", size_orig_hint: "best quality", size_1080: "Instagram size", size_1080_hint: "1080 px wide, smaller file",
+      ftype: "Photo file type", jpeg_hint: "recommended", png_hint: "lossless, larger",
+      video_note: "Converting a video takes as long as the video itself. Keep the app open and the screen on.",
+      convert: { one: "Convert", other: "Convert {n} files" }, converting: "Converting…",
+      save: { one: "Save to Photos", other: "Save all {n} to Photos" }, cancel: "Cancel",
+      badge_done: "Ready", badge_err: "Error",
+      fits: "Ready as is. Instagram will show all of it.",
+      strip_sides: "A thin {color} strip was added on the sides (+{pct}%). Nothing is cut.",
+      strip_tb: "A thin {color} strip was added above and below (+{pct}%). Nothing is cut.",
+      color_white: "white", color_black: "black",
+      resized: "resized to Instagram size", reduced: "reduced to your phone's limit", capped: "reduced to 4K",
+      opening: "Opening…", cant_open: { one: "1 file couldn't be opened. Try JPEG, PNG, MP4 or MOV.", other: "{n} files couldn't be opened. Try JPEG, PNG, MP4 or MOV." },
+      file_of: "File {k} of {n}: ", prep_photo: "preparing photo…", prep_video: "starting video…", encoding: "encoding video {t}",
+      done_save: "Done! Now tap the button below to save.", canceled: "Canceled. Finished files are kept.",
+      saved: { one: "Saved.", other: "Saved {n} files." }, save_canceled: "Saving canceled.", saved_some: "Saved {n}. The rest were skipped.",
+      prompt_open: "A save window is already open.", save_unavail: "Saving isn't available here. Open the installed app instead.",
+      ios_save: "Choose “Save Image” or “Save Video” to put it in Photos.", downloading: "Downloading…",
+      err_large: "This photo is too large for your phone. Choose Instagram size under More options.",
+      err_video_browser: "Your phone's browser can't create videos. Update your phone or use Safari or Chrome.",
+      err_video_read: "This video couldn't be read.", err_video_start: "The video couldn't start. Tap Convert again.",
+      err_video_empty: "The video came out empty. Try again with the screen on.",
+      webm_warn: "This browser made a WebM video, which Instagram doesn't accept. Use Safari or Chrome.",
+      some_failed: "Some files couldn't be converted.",
+      tip_title: "Last step in Instagram", tip_body: "When you pick the photo, tap the ⤢ button in the bottom-left corner so it shows in full.",
+      ios_title: "Add Uncrop to your Home Screen", ios1: "Tap the Share button in Safari.", ios2: "Tap “Add to Home Screen”.", ios3: "Tap “Add”. Uncrop now opens like any other app and works offline.", got_it: "Got it"
+    },
+    es: {
+      ai: "Relleno IA", ai_hint: "Relleno IA: pinta cómo seguiría la escena. Funciona en tu teléfono, gratis.", ai_unavailable: "El relleno IA funciona en la app instalada, no en esta vista previa.", ai_dl_title: "Descarga la IA una vez", ai_dl_body: "El relleno IA necesita una descarga única de unos 200 MB. Usa wifi. Después funciona sin conexión.", ai_dl_ok: "Descargar", not_now: "Ahora no", ai_downloading: "Descargando la IA… {p} %", ai_loading: "Iniciando la IA…", ai_filling: "La IA está rellenando los bordes ({k} de {n})…", ai_video: "La IA está preparando los bordes del video ({k} de {n})…", ai_failed: "La IA no pudo funcionar en este teléfono, así que se usó una franja lisa.", ai_declined: "Elige otro color de franja o descarga la IA para usar el relleno IA.",
+      install: "Instalar", language: "Idioma",
+      h1: "Publica la foto completa. Sin recortes.",
+      intro: "Instagram recorta las fotos y videos demasiado altos o anchos. Uncrop añade la franja más fina posible para que se vea todo. Tu imagen nunca se recorta, estira ni desenfoca.",
+      step1: "Elige fotos o videos", step2: "Toca Convertir", step3: "Guarda y publica",
+      choose: "Elegir fotos o videos", try_example: "Pruébalo con una foto de ejemplo",
+      privacy: "Todo ocurre en tu teléfono. No se sube nada.",
+      preview_label: "Vista previa", remove: "Quitar este archivo", add_more: "Añadir más archivos",
+      files: { one: "Tu archivo", other: "Tus archivos ({n})" },
+      color: "Color de la franja", auto: "Automático", auto_light: "blanco, como el modo claro", auto_dark: "negro, como el modo oscuro", white: "Blanco", black: "Negro",
+      more: "Más opciones", size: "Tamaño", size_orig: "Original", size_orig_hint: "máxima calidad", size_1080: "Tamaño Instagram", size_1080_hint: "1080 px de ancho, archivo más ligero",
+      ftype: "Tipo de archivo de foto", jpeg_hint: "recomendado", png_hint: "sin pérdida, más pesado",
+      video_note: "Convertir un video tarda lo mismo que dura. Mantén la app abierta y la pantalla encendida.",
+      convert: { one: "Convertir", other: "Convertir {n} archivos" }, converting: "Convirtiendo…",
+      save: { one: "Guardar en Fotos", other: "Guardar los {n} en Fotos" }, cancel: "Cancelar",
+      badge_done: "Listo", badge_err: "Error",
+      fits: "Ya encaja. Instagram mostrará todo, sin recortes.",
+      strip_sides: "Se añadió una franja {color} fina a los lados (+{pct} %). No se recorta nada.",
+      strip_tb: "Se añadió una franja {color} fina arriba y abajo (+{pct} %). No se recorta nada.",
+      color_white: "blanca", color_black: "negra",
+      resized: "ajustada al tamaño de Instagram", reduced: "reducida al límite de tu teléfono", capped: "reducida a 4K",
+      opening: "Abriendo…", cant_open: { one: "1 archivo no se pudo abrir. Prueba con JPEG, PNG, MP4 o MOV.", other: "{n} archivos no se pudieron abrir. Prueba con JPEG, PNG, MP4 o MOV." },
+      file_of: "Archivo {k} de {n}: ", prep_photo: "preparando la foto…", prep_video: "iniciando el video…", encoding: "codificando video {t}",
+      done_save: "¡Listo! Ahora toca el botón de abajo para guardar.", canceled: "Cancelado. Los archivos terminados se conservan.",
+      saved: { one: "Guardado.", other: "Se guardaron {n} archivos." }, save_canceled: "Guardado cancelado.", saved_some: "Se guardaron {n}. El resto se omitió.",
+      prompt_open: "Ya hay una ventana de guardado abierta.", save_unavail: "Aquí no se puede guardar. Abre la app instalada.",
+      ios_save: "Elige «Guardar imagen» o «Guardar video» para llevarlo a Fotos.", downloading: "Descargando…",
+      err_large: "Esta foto es demasiado grande para tu teléfono. Elige Tamaño Instagram en Más opciones.",
+      err_video_browser: "El navegador de tu teléfono no puede crear videos. Actualiza el teléfono o usa Safari o Chrome.",
+      err_video_read: "No se pudo leer este video.", err_video_start: "El video no pudo iniciar. Toca Convertir de nuevo.",
+      err_video_empty: "El video salió vacío. Inténtalo de nuevo con la pantalla encendida.",
+      webm_warn: "Este navegador creó un video WebM, que Instagram no acepta. Usa Safari o Chrome.",
+      some_failed: "Algunos archivos no se pudieron convertir.",
+      tip_title: "Último paso en Instagram", tip_body: "Al elegir la foto, toca el botón ⤢ de la esquina inferior izquierda para que se vea completa.",
+      ios_title: "Añade Uncrop a tu pantalla de inicio", ios1: "Toca el botón Compartir en Safari.", ios2: "Toca «Agregar a inicio».", ios3: "Toca «Agregar». Uncrop se abrirá como cualquier app y funcionará sin conexión.", got_it: "Entendido"
+    },
+    pt: {
+      ai: "Preenchimento IA", ai_hint: "Preenchimento IA: pinta como a cena continuaria. Funciona no seu celular, de graça.", ai_unavailable: "O preenchimento IA funciona no app instalado, não nesta pré-visualização.", ai_dl_title: "Baixe a IA uma vez", ai_dl_body: "O preenchimento IA precisa de um download único de cerca de 200 MB. Use o Wi-Fi. Depois funciona offline.", ai_dl_ok: "Baixar", not_now: "Agora não", ai_downloading: "Baixando a IA… {p}%", ai_loading: "Iniciando a IA…", ai_filling: "A IA está preenchendo as bordas ({k} de {n})…", ai_video: "A IA está preparando as bordas do vídeo ({k} de {n})…", ai_failed: "A IA não conseguiu rodar neste celular, então foi usada uma faixa lisa.", ai_declined: "Escolha outra cor de faixa ou baixe a IA para usar o preenchimento IA.",
+      install: "Instalar", language: "Idioma",
+      h1: "Poste a foto inteira. Sem cortes.",
+      intro: "O Instagram corta fotos e vídeos altos ou largos demais. O Uncrop adiciona a faixa mais fina possível para que tudo apareça. Sua imagem nunca é cortada, esticada ou desfocada.",
+      step1: "Escolha fotos ou vídeos", step2: "Toque em Converter", step3: "Salve e poste",
+      choose: "Escolher fotos ou vídeos", try_example: "Teste com uma foto de exemplo",
+      privacy: "Tudo acontece no seu celular. Nada é enviado.",
+      preview_label: "Pré-visualização", remove: "Remover este arquivo", add_more: "Adicionar mais arquivos",
+      files: { one: "Seu arquivo", other: "Seus arquivos ({n})" },
+      color: "Cor da faixa", auto: "Automática", auto_light: "branca, como no modo claro", auto_dark: "preta, como no modo escuro", white: "Branca", black: "Preta",
+      more: "Mais opções", size: "Tamanho", size_orig: "Original", size_orig_hint: "melhor qualidade", size_1080: "Tamanho do Instagram", size_1080_hint: "1080 px de largura, arquivo menor",
+      ftype: "Tipo de arquivo da foto", jpeg_hint: "recomendado", png_hint: "sem perdas, maior",
+      video_note: "Converter um vídeo leva o mesmo tempo que ele dura. Mantenha o app aberto e a tela ligada.",
+      convert: { one: "Converter", other: "Converter {n} arquivos" }, converting: "Convertendo…",
+      save: { one: "Salvar em Fotos", other: "Salvar os {n} em Fotos" }, cancel: "Cancelar",
+      badge_done: "Pronto", badge_err: "Erro",
+      fits: "Já cabe. O Instagram vai mostrar tudo, sem cortes.",
+      strip_sides: "Uma faixa {color} fina foi adicionada nas laterais (+{pct}%). Nada é cortado.",
+      strip_tb: "Uma faixa {color} fina foi adicionada em cima e embaixo (+{pct}%). Nada é cortado.",
+      color_white: "branca", color_black: "preta",
+      resized: "redimensionada para o tamanho do Instagram", reduced: "reduzida ao limite do seu celular", capped: "reduzida para 4K",
+      opening: "Abrindo…", cant_open: { one: "1 arquivo não pôde ser aberto. Tente JPEG, PNG, MP4 ou MOV.", other: "{n} arquivos não puderam ser abertos. Tente JPEG, PNG, MP4 ou MOV." },
+      file_of: "Arquivo {k} de {n}: ", prep_photo: "preparando a foto…", prep_video: "iniciando o vídeo…", encoding: "codificando vídeo {t}",
+      done_save: "Pronto! Agora toque no botão abaixo para salvar.", canceled: "Cancelado. Os arquivos prontos foram mantidos.",
+      saved: { one: "Salvo.", other: "{n} arquivos salvos." }, save_canceled: "Salvamento cancelado.", saved_some: "{n} salvos. O restante foi ignorado.",
+      prompt_open: "Já existe uma janela de salvamento aberta.", save_unavail: "Não é possível salvar aqui. Abra o app instalado.",
+      ios_save: "Escolha “Salvar Imagem” ou “Salvar Vídeo” para enviar para Fotos.", downloading: "Baixando…",
+      err_large: "Esta foto é grande demais para o seu celular. Escolha Tamanho do Instagram em Mais opções.",
+      err_video_browser: "O navegador do seu celular não consegue criar vídeos. Atualize o celular ou use Safari ou Chrome.",
+      err_video_read: "Não foi possível ler este vídeo.", err_video_start: "O vídeo não pôde começar. Toque em Converter novamente.",
+      err_video_empty: "O vídeo saiu vazio. Tente de novo com a tela ligada.",
+      webm_warn: "Este navegador criou um vídeo WebM, que o Instagram não aceita. Use Safari ou Chrome.",
+      some_failed: "Alguns arquivos não puderam ser convertidos.",
+      tip_title: "Último passo no Instagram", tip_body: "Ao escolher a foto, toque no botão ⤢ no canto inferior esquerdo para que ela apareça inteira.",
+      ios_title: "Adicione o Uncrop à Tela de Início", ios1: "Toque no botão Compartilhar no Safari.", ios2: "Toque em “Adicionar à Tela de Início”.", ios3: "Toque em “Adicionar”. O Uncrop abre como qualquer app e funciona offline.", got_it: "Entendi"
+    },
+    fr: {
+      ai: "Remplissage IA", ai_hint: "Remplissage IA : peint la suite de la scène. Fonctionne sur votre téléphone, gratuitement.", ai_unavailable: "Le remplissage IA fonctionne dans l'app installée, pas dans cet aperçu.", ai_dl_title: "Télécharger l'IA une fois", ai_dl_body: "Le remplissage IA nécessite un téléchargement unique d'environ 200 Mo. Utilisez le Wi-Fi. Ensuite, il fonctionne hors ligne.", ai_dl_ok: "Télécharger", not_now: "Pas maintenant", ai_downloading: "Téléchargement de l'IA… {p} %", ai_loading: "Démarrage de l'IA…", ai_filling: "L'IA complète les bords ({k} sur {n})…", ai_video: "L'IA prépare les bords de la vidéo ({k} sur {n})…", ai_failed: "L'IA n'a pas pu fonctionner sur ce téléphone, une bande unie a donc été utilisée.", ai_declined: "Choisissez une autre couleur de bande ou téléchargez l'IA pour utiliser le remplissage IA.",
+      install: "Installer", language: "Langue",
+      h1: "Publiez la photo entière. Rien de coupé.",
+      intro: "Instagram coupe les photos et vidéos trop hautes ou trop larges. Uncrop ajoute la bande la plus fine possible pour que tout s'affiche. Votre image n'est jamais coupée, étirée ni floutée.",
+      step1: "Choisissez des photos ou vidéos", step2: "Touchez Convertir", step3: "Enregistrez et publiez",
+      choose: "Choisir des photos ou vidéos", try_example: "Essayer avec une photo d'exemple",
+      privacy: "Tout se passe sur votre téléphone. Rien n'est envoyé.",
+      preview_label: "Aperçu", remove: "Retirer ce fichier", add_more: "Ajouter des fichiers",
+      files: { one: "Votre fichier", other: "Vos fichiers ({n})" },
+      color: "Couleur de la bande", auto: "Automatique", auto_light: "blanche, comme le mode clair", auto_dark: "noire, comme le mode sombre", white: "Blanche", black: "Noire",
+      more: "Plus d'options", size: "Taille", size_orig: "Originale", size_orig_hint: "meilleure qualité", size_1080: "Taille Instagram", size_1080_hint: "1080 px de large, fichier plus léger",
+      ftype: "Type de fichier photo", jpeg_hint: "recommandé", png_hint: "sans perte, plus lourd",
+      video_note: "Convertir une vidéo prend autant de temps que sa durée. Gardez l'app ouverte et l'écran allumé.",
+      convert: { one: "Convertir", other: "Convertir {n} fichiers" }, converting: "Conversion…",
+      save: { one: "Enregistrer dans Photos", other: "Enregistrer les {n} dans Photos" }, cancel: "Annuler",
+      badge_done: "Prêt", badge_err: "Erreur",
+      fits: "Ça rentre déjà. Instagram affichera tout, sans coupure.",
+      strip_sides: "Une fine bande {color} a été ajoutée sur les côtés (+{pct} %). Rien n'est coupé.",
+      strip_tb: "Une fine bande {color} a été ajoutée en haut et en bas (+{pct} %). Rien n'est coupé.",
+      color_white: "blanche", color_black: "noire",
+      resized: "redimensionnée à la taille Instagram", reduced: "réduite à la limite de votre téléphone", capped: "réduite en 4K",
+      opening: "Ouverture…", cant_open: { one: "1 fichier n'a pas pu être ouvert. Essayez JPEG, PNG, MP4 ou MOV.", other: "{n} fichiers n'ont pas pu être ouverts. Essayez JPEG, PNG, MP4 ou MOV." },
+      file_of: "Fichier {k} sur {n} : ", prep_photo: "préparation de la photo…", prep_video: "démarrage de la vidéo…", encoding: "encodage de la vidéo {t}",
+      done_save: "Terminé ! Touchez maintenant le bouton ci-dessous pour enregistrer.", canceled: "Annulé. Les fichiers terminés sont conservés.",
+      saved: { one: "Enregistré.", other: "{n} fichiers enregistrés." }, save_canceled: "Enregistrement annulé.", saved_some: "{n} enregistrés. Les autres ont été ignorés.",
+      prompt_open: "Une fenêtre d'enregistrement est déjà ouverte.", save_unavail: "Impossible d'enregistrer ici. Ouvrez l'app installée.",
+      ios_save: "Choisissez « Enregistrer l'image » ou « Enregistrer la vidéo » pour l'ajouter à Photos.", downloading: "Téléchargement…",
+      err_large: "Cette photo est trop grande pour votre téléphone. Choisissez Taille Instagram dans Plus d'options.",
+      err_video_browser: "Le navigateur de votre téléphone ne peut pas créer de vidéos. Mettez à jour votre téléphone ou utilisez Safari ou Chrome.",
+      err_video_read: "Impossible de lire cette vidéo.", err_video_start: "La vidéo n'a pas pu démarrer. Touchez Convertir à nouveau.",
+      err_video_empty: "La vidéo est vide. Réessayez avec l'écran allumé.",
+      webm_warn: "Ce navigateur a créé une vidéo WebM, qu'Instagram n'accepte pas. Utilisez Safari ou Chrome.",
+      some_failed: "Certains fichiers n'ont pas pu être convertis.",
+      tip_title: "Dernière étape dans Instagram", tip_body: "Quand vous choisissez la photo, touchez le bouton ⤢ en bas à gauche pour qu'elle s'affiche en entier.",
+      ios_title: "Ajouter Uncrop à l'écran d'accueil", ios1: "Touchez le bouton Partager dans Safari.", ios2: "Touchez « Sur l'écran d'accueil ».", ios3: "Touchez « Ajouter ». Uncrop s'ouvre alors comme une app et fonctionne hors ligne.", got_it: "Compris"
+    },
+    de: {
+      ai: "KI-Füllung", ai_hint: "KI-Füllung: malt, wie die Szene weitergehen würde. Läuft auf deinem Handy, kostenlos.", ai_unavailable: "Die KI-Füllung funktioniert in der installierten App, nicht in dieser Vorschau.", ai_dl_title: "KI einmalig herunterladen", ai_dl_body: "Die KI-Füllung braucht einen einmaligen Download von etwa 200 MB. Nutze WLAN. Danach funktioniert sie offline.", ai_dl_ok: "Herunterladen", not_now: "Nicht jetzt", ai_downloading: "KI wird heruntergeladen… {p} %", ai_loading: "KI wird gestartet…", ai_filling: "Die KI füllt die Ränder ({k} von {n})…", ai_video: "Die KI bereitet die Videoränder vor ({k} von {n})…", ai_failed: "Die KI konnte auf diesem Handy nicht laufen, daher wurde ein einfarbiger Streifen verwendet.", ai_declined: "Wähle eine andere Streifenfarbe oder lade die KI herunter, um die KI-Füllung zu nutzen.",
+      install: "Installieren", language: "Sprache",
+      h1: "Das ganze Foto posten. Nichts abgeschnitten.",
+      intro: "Instagram schneidet zu hohe oder zu breite Fotos und Videos zu. Uncrop fügt den schmalsten möglichen Streifen hinzu, damit alles sichtbar bleibt. Dein Bild wird nie beschnitten, gestreckt oder weichgezeichnet.",
+      step1: "Fotos oder Videos auswählen", step2: "Auf Umwandeln tippen", step3: "Speichern und posten",
+      choose: "Fotos oder Videos auswählen", try_example: "Mit einem Beispielfoto ausprobieren",
+      privacy: "Alles passiert auf deinem Handy. Nichts wird hochgeladen.",
+      preview_label: "Vorschau", remove: "Diese Datei entfernen", add_more: "Weitere Dateien hinzufügen",
+      files: { one: "Deine Datei", other: "Deine Dateien ({n})" },
+      color: "Streifenfarbe", auto: "Automatisch", auto_light: "weiß, wie im hellen Modus", auto_dark: "schwarz, wie im dunklen Modus", white: "Weiß", black: "Schwarz",
+      more: "Weitere Optionen", size: "Größe", size_orig: "Original", size_orig_hint: "beste Qualität", size_1080: "Instagram-Größe", size_1080_hint: "1080 px breit, kleinere Datei",
+      ftype: "Dateityp für Fotos", jpeg_hint: "empfohlen", png_hint: "verlustfrei, größer",
+      video_note: "Ein Video umzuwandeln dauert so lange wie das Video selbst. Lass die App geöffnet und den Bildschirm an.",
+      convert: { one: "Umwandeln", other: "{n} Dateien umwandeln" }, converting: "Wird umgewandelt…",
+      save: { one: "In Fotos speichern", other: "Alle {n} in Fotos speichern" }, cancel: "Abbrechen",
+      badge_done: "Fertig", badge_err: "Fehler",
+      fits: "Passt so, wie es ist. Instagram zeigt alles.",
+      strip_sides: "Ein schmaler {color} Streifen wurde an den Seiten hinzugefügt (+{pct} %). Nichts wird abgeschnitten.",
+      strip_tb: "Ein schmaler {color} Streifen wurde oben und unten hinzugefügt (+{pct} %). Nichts wird abgeschnitten.",
+      color_white: "weißer", color_black: "schwarzer",
+      resized: "auf Instagram-Größe verkleinert", reduced: "auf das Limit deines Handys verkleinert", capped: "auf 4K verkleinert",
+      opening: "Wird geöffnet…", cant_open: { one: "1 Datei konnte nicht geöffnet werden. Versuche JPEG, PNG, MP4 oder MOV.", other: "{n} Dateien konnten nicht geöffnet werden. Versuche JPEG, PNG, MP4 oder MOV." },
+      file_of: "Datei {k} von {n}: ", prep_photo: "Foto wird vorbereitet…", prep_video: "Video wird gestartet…", encoding: "Video wird kodiert {t}",
+      done_save: "Fertig! Tippe jetzt unten auf den Button zum Speichern.", canceled: "Abgebrochen. Fertige Dateien bleiben erhalten.",
+      saved: { one: "Gespeichert.", other: "{n} Dateien gespeichert." }, save_canceled: "Speichern abgebrochen.", saved_some: "{n} gespeichert. Der Rest wurde übersprungen.",
+      prompt_open: "Ein Speicherfenster ist bereits geöffnet.", save_unavail: "Speichern ist hier nicht möglich. Öffne die installierte App.",
+      ios_save: "Wähle „Bild sichern“ oder „Video sichern“, um es in Fotos abzulegen.", downloading: "Wird heruntergeladen…",
+      err_large: "Dieses Foto ist zu groß für dein Handy. Wähle Instagram-Größe unter Weitere Optionen.",
+      err_video_browser: "Der Browser deines Handys kann keine Videos erstellen. Aktualisiere dein Handy oder nutze Safari oder Chrome.",
+      err_video_read: "Dieses Video konnte nicht gelesen werden.", err_video_start: "Das Video konnte nicht starten. Tippe erneut auf Umwandeln.",
+      err_video_empty: "Das Video ist leer. Versuche es mit eingeschaltetem Bildschirm erneut.",
+      webm_warn: "Dieser Browser hat ein WebM-Video erstellt, das Instagram nicht akzeptiert. Nutze Safari oder Chrome.",
+      some_failed: "Einige Dateien konnten nicht umgewandelt werden.",
+      tip_title: "Letzter Schritt in Instagram", tip_body: "Tippe beim Auswählen des Fotos unten links auf den ⤢-Button, damit es vollständig angezeigt wird.",
+      ios_title: "Uncrop zum Home-Bildschirm hinzufügen", ios1: "Tippe in Safari auf den Teilen-Button.", ios2: "Tippe auf „Zum Home-Bildschirm“.", ios3: "Tippe auf „Hinzufügen“. Uncrop öffnet sich dann wie jede App und funktioniert offline.", got_it: "Verstanden"
+    },
+    it: {
+      ai: "Riempimento IA", ai_hint: "Riempimento IA: dipinge come continuerebbe la scena. Funziona sul tuo telefono, gratis.", ai_unavailable: "Il riempimento IA funziona nell'app installata, non in questa anteprima.", ai_dl_title: "Scarica l'IA una volta", ai_dl_body: "Il riempimento IA richiede un download unico di circa 200 MB. Usa il Wi-Fi. Poi funziona offline.", ai_dl_ok: "Scarica", not_now: "Non ora", ai_downloading: "Download dell'IA… {p}%", ai_loading: "Avvio dell'IA…", ai_filling: "L'IA sta riempiendo i bordi ({k} di {n})…", ai_video: "L'IA sta preparando i bordi del video ({k} di {n})…", ai_failed: "L'IA non è riuscita a funzionare su questo telefono, quindi è stata usata una striscia semplice.", ai_declined: "Scegli un altro colore della striscia o scarica l'IA per usare il riempimento IA.",
+      install: "Installa", language: "Lingua",
+      h1: "Pubblica la foto intera. Niente tagli.",
+      intro: "Instagram taglia foto e video troppo alti o troppo larghi. Uncrop aggiunge la striscia più sottile possibile così si vede tutto. La tua immagine non viene mai tagliata, allungata o sfocata.",
+      step1: "Scegli foto o video", step2: "Tocca Converti", step3: "Salva e pubblica",
+      choose: "Scegli foto o video", try_example: "Prova con una foto di esempio",
+      privacy: "Tutto avviene sul tuo telefono. Non viene caricato nulla.",
+      preview_label: "Anteprima", remove: "Rimuovi questo file", add_more: "Aggiungi altri file",
+      files: { one: "Il tuo file", other: "I tuoi file ({n})" },
+      color: "Colore della striscia", auto: "Automatico", auto_light: "bianco, come la modalità chiara", auto_dark: "nero, come la modalità scura", white: "Bianco", black: "Nero",
+      more: "Altre opzioni", size: "Dimensione", size_orig: "Originale", size_orig_hint: "massima qualità", size_1080: "Dimensione Instagram", size_1080_hint: "1080 px di larghezza, file più leggero",
+      ftype: "Tipo di file foto", jpeg_hint: "consigliato", png_hint: "senza perdita, più pesante",
+      video_note: "Convertire un video richiede quanto dura il video. Tieni l'app aperta e lo schermo acceso.",
+      convert: { one: "Converti", other: "Converti {n} file" }, converting: "Conversione…",
+      save: { one: "Salva in Foto", other: "Salva tutti e {n} in Foto" }, cancel: "Annulla",
+      badge_done: "Pronto", badge_err: "Errore",
+      fits: "Va già bene. Instagram mostrerà tutto, senza tagli.",
+      strip_sides: "È stata aggiunta una sottile striscia {color} ai lati (+{pct}%). Non viene tagliato nulla.",
+      strip_tb: "È stata aggiunta una sottile striscia {color} sopra e sotto (+{pct}%). Non viene tagliato nulla.",
+      color_white: "bianca", color_black: "nera",
+      resized: "ridimensionata per Instagram", reduced: "ridotta al limite del tuo telefono", capped: "ridotta a 4K",
+      opening: "Apertura…", cant_open: { one: "1 file non è stato aperto. Prova JPEG, PNG, MP4 o MOV.", other: "{n} file non sono stati aperti. Prova JPEG, PNG, MP4 o MOV." },
+      file_of: "File {k} di {n}: ", prep_photo: "preparazione della foto…", prep_video: "avvio del video…", encoding: "codifica del video {t}",
+      done_save: "Fatto! Ora tocca il pulsante qui sotto per salvare.", canceled: "Annullato. I file completati vengono mantenuti.",
+      saved: { one: "Salvato.", other: "{n} file salvati." }, save_canceled: "Salvataggio annullato.", saved_some: "{n} salvati. Gli altri sono stati saltati.",
+      prompt_open: "C'è già una finestra di salvataggio aperta.", save_unavail: "Qui non è possibile salvare. Apri l'app installata.",
+      ios_save: "Scegli «Salva immagine» o «Salva video» per metterlo in Foto.", downloading: "Download in corso…",
+      err_large: "Questa foto è troppo grande per il tuo telefono. Scegli Dimensione Instagram in Altre opzioni.",
+      err_video_browser: "Il browser del tuo telefono non può creare video. Aggiorna il telefono o usa Safari o Chrome.",
+      err_video_read: "Impossibile leggere questo video.", err_video_start: "Il video non è partito. Tocca di nuovo Converti.",
+      err_video_empty: "Il video è vuoto. Riprova con lo schermo acceso.",
+      webm_warn: "Questo browser ha creato un video WebM, che Instagram non accetta. Usa Safari o Chrome.",
+      some_failed: "Alcuni file non sono stati convertiti.",
+      tip_title: "Ultimo passo su Instagram", tip_body: "Quando scegli la foto, tocca il pulsante ⤢ in basso a sinistra per mostrarla per intero.",
+      ios_title: "Aggiungi Uncrop alla schermata Home", ios1: "Tocca il pulsante Condividi in Safari.", ios2: "Tocca «Aggiungi alla schermata Home».", ios3: "Tocca «Aggiungi». Uncrop si aprirà come ogni altra app e funzionerà offline.", got_it: "Capito"
+    }
+  };
+
+  const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+  function pickLang() {
+    const saved = store.get("uncrop-lang");
+    if (saved && I18N[saved]) return saved;
+    for (const l of (navigator.languages || [navigator.language || "en"])) { const c = String(l).slice(0, 2).toLowerCase(); if (I18N[c]) return c; }
+    return "en";
+  }
+  let lang = pickLang();
+  function t(k, v = {}) {
+    let s = I18N[lang][k] ?? I18N.en[k] ?? k;
+    if (typeof s === "object") s = v.n === 1 ? s.one : s.other;
+    return String(s).replace(/\{(\w+)\}/g, (_, x) => v[x] ?? "");
+  }
+  function applyLang() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll("[data-i18n-aria]").forEach(el => el.setAttribute("aria-label", t(el.dataset.i18nAria)));
+    $("langSel").value = lang;
+    updateAutoHint();
+    if (items.length) refresh();
+    renderStatus();
+  }
+
+  // ================= App =================
+  const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const MAX_PX = isIOS ? 16.0e6 : 120e6;     // iOS Safari refuses canvases above ~16.7 MP
+  const MAX_VIDEO_SIDE = 3840;               // stay within H.264 encoder limits
+  const LIMITS = { image: [0.8, 1.91], video: [9/16, 16/9] }; // shapes Instagram shows without cropping
+  const IN_CLAUDE = false; // true in the build that runs inside the Claude app (no outside downloads there)
+  const ORT_BASE = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/";
+  const MODEL_URL = "https://huggingface.co/Carve/LaMa-ONNX/resolve/main/lama_fp32.onnx"; // LaMa inpainting, Apache-2.0
+  const MODEL_CACHE = "uncrop-models";
+  const NAMED = [[9/16,"9:16"],[2/3,"2:3"],[3/4,"3:4"],[4/5,"4:5"],[1,"1:1"],[5/4,"5:4"],[4/3,"4:3"],[3/2,"3:2"],[16/9,"16:9"],[1.91,"1.91:1"],[2,"2:1"]];
+
+  const items = [];
+  let sel = 0, busy = false, cancelReq = false, uid = 0;
+  let status = { fn: () => "", err: false };
+
+  const opt = (n) => document.querySelector(`input[name="${n}"]:checked`)?.value;
+  const even = (n) => Math.max(2, Math.round(n / 2) * 2);
+  const clamp = (x, [lo, hi]) => Math.min(hi, Math.max(lo, x));
+  const ratioName = (r) => { for (const [v, n] of NAMED) if (Math.abs(r - v) / v < 0.012) return n; return r.toFixed(2) + ":1"; };
+  const fmtTime = (s) => isFinite(s) ? `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}` : "?";
+
+  // Phone light / dark mode drives the Automatic strip color
+  const darkMQ = matchMedia("(prefers-color-scheme: dark)");
+  // AI fill falls back to the Automatic color underneath (and if the AI can't run)
+  const stripColor = () => { const bg = opt("bg") || "auto"; return bg === "black" || ((bg === "auto" || bg === "ai") && darkMQ.matches) ? "#000000" : "#ffffff"; };
+  function updateAutoHint() {
+    const bg = opt("bg") || "auto", h = $("autoHint");
+    h.hidden = bg === "white" || bg === "black";
+    h.textContent = bg === "ai" ? t(IN_CLAUDE ? "ai_unavailable" : "ai_hint") : t("auto") + ": " + (darkMQ.matches ? t("auto_dark") : t("auto_light")) + ".";
+  }
+  darkMQ.addEventListener?.("change", () => { updateAutoHint(); invalidate(); });
+
+  // Thinnest strip: pad only up to the nearest shape Instagram accepts
+  function plan(it) {
+    const r = it.w / it.h, T = clamp(r, LIMITS[it.kind]);
+    let ow = it.w, oh = it.h;
+    if (Math.abs(r - T) / T >= 0.004) { if (r > T) oh = Math.ceil(it.w / T); else ow = Math.ceil(it.h * T); }
+    let scale = 1, reason = "";
+    if (opt("res") === "1080" && ow > 1080) { scale = 1080 / ow; reason = "resized"; }
+    if (ow * oh * scale * scale > MAX_PX) { scale = Math.sqrt(MAX_PX / (ow * oh)); reason = "reduced"; }
+    if (it.kind === "video" && Math.max(ow, oh) * scale > MAX_VIDEO_SIDE) { scale = MAX_VIDEO_SIDE / Math.max(ow, oh); reason = "capped"; }
+    let W = Math.round(ow * scale), H = Math.round(oh * scale);
+    if (it.kind === "video") { W = even(W); H = even(H); }
+    const padded = ow !== it.w || oh !== it.h;
+    return { W, H, scale, reason, padded, wider: ow > it.w, added: Math.max(1, Math.round(((ow * oh) / (it.w * it.h) - 1) * 100)), untouched: !padded && scale === 1 };
+  }
+
+  function render(ctx, src, sw, sh, W, H) {
+    const s = Math.min(W / sw, H / sh);
+    const dw = Math.round(sw * s), dh = Math.round(sh * s);
+    const dx = Math.round((W - dw) / 2), dy = Math.round((H - dh) / 2);
+    ctx.fillStyle = stripColor(); ctx.fillRect(0, 0, W, H);
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
+    // At full size the photo is copied pixel for pixel (whole-pixel position, no resampling)
+    if (dw === sw && dh === sh) ctx.drawImage(src, dx, dy); else ctx.drawImage(src, dx, dy, dw, dh);
+  }
+
+  function drawPreview() {
+    const it = items[sel]; if (!it) return;
+    const p = plan(it), c = $("preview"), k = Math.min(1, 900 / Math.max(p.W, p.H));
+    c.width = Math.max(1, Math.round(p.W * k)); c.height = Math.max(1, Math.round(p.H * k));
+    const ctx = c.getContext("2d");
+    if (it.kind === "video" && (!it.src || it.src.readyState < 2)) {
+      ctx.fillStyle = "#222"; ctx.fillRect(0, 0, c.width, c.height);
+      ctx.fillStyle = "#fff"; ctx.font = "600 40px system-ui"; ctx.textAlign = "center"; ctx.fillText("▶", c.width / 2, c.height / 2 + 14);
+      return;
+    }
+    if (it.status === "done" && it.preview) { ctx.drawImage(it.preview, 0, 0, c.width, c.height); return; }
+    render(ctx, it.src, it.w, it.h, c.width, c.height);
+  }
+
+
+  function drawStrip() {
+    const s = $("strip");
+    s.innerHTML = "";
+    items.forEach((it, i) => {
+      const b = document.createElement("button");
+      b.className = "thumb" + (i === sel ? " sel" : "");
+      b.setAttribute("aria-label", `${i + 1}: ${it.name}`);
+      b.innerHTML = `<img src="${it.thumb || ""}" alt="">${it.kind === "video" ? '<span class="play">▶</span>' : ""}` +
+        (it.status === "done" ? `<span class="badge done">${t("badge_done")}</span>` : it.status === "error" ? `<span class="badge err">${t("badge_err")}</span>` : it.status === "working" ? `<span class="badge">…</span>` : "");
+      b.addEventListener("click", () => { sel = i; refresh(); });
+      s.append(b);
+    });
+    const add = document.createElement("button");
+    add.className = "add"; add.textContent = "+"; add.setAttribute("aria-label", t("add_more"));
+    add.addEventListener("click", () => !busy && $("file").click());
+    s.append(add);
+    $("queueLbl").textContent = t("files", { n: items.length });
+  }
+
+  function updateButtons() {
+    const pending = items.filter(i => i.status !== "done").length;
+    const done = items.length - pending;
+    const go = $("goBtn");
+    $("work").inert = busy;
+    if (busy) { go.disabled = true; go.textContent = t("converting"); return; }
+    go.disabled = false;
+    if (pending) { go.textContent = t("convert", { n: pending }); go.dataset.mode = "convert"; }
+    else { go.textContent = t("save", { n: done }); go.dataset.mode = "save"; }
+  }
+
+  function refresh() { drawStrip(); drawPreview(); updateButtons(); $("videoNote").hidden = !items.some(i => i.kind === "video"); }
+  function invalidate() {
+    if (busy) return;
+    items.forEach(i => { if (i.status === "done" || i.status === "error") { i.status = "ready"; i.out = null; i.preview = null; } });
+    $("tip").hidden = true; setStatus(() => ""); if (items.length) refresh();
+  }
+
+  function setStatus(fn, err) { status = { fn, err: !!err }; renderStatus(); }
+  function renderStatus() { $("status").textContent = status.fn(); $("status").className = "status" + (status.err ? " err" : ""); }
+  const S = (k, v) => () => t(k, v);
+
+  // ---------- Adding files ----------
+  function thumbOf(src, w, h) {
+    const c = document.createElement("canvas"); c.width = 148; c.height = 148;
+    const x = c.getContext("2d"), s = Math.max(148 / w, 148 / h);
+    x.fillStyle = "#333"; x.fillRect(0, 0, 148, 148);
+    try { x.drawImage(src, (148 - w * s) / 2, (148 - h * s) / 2, w * s, h * s); } catch (e) {}
+    return c.toDataURL("image/jpeg", 0.7);
+  }
+
+  async function addFile(file) {
+    const isVideo = file.type.startsWith("video/") || /\.(mp4|mov|m4v|webm)$/i.test(file.name);
+    const url = URL.createObjectURL(file);
+    const it = { id: ++uid, file, name: file.name || (isVideo ? "video.mp4" : "photo.jpg"), url, kind: isVideo ? "video" : "image", status: "ready" };
+    try {
+      if (isVideo) {
+        const v = document.createElement("video");
+        v.muted = true; v.playsInline = true; v.setAttribute("playsinline", ""); v.preload = "auto"; v.src = url;
+        await new Promise((res, rej) => { v.onloadedmetadata = res; v.onerror = () => rej(new Error("video")); v.load(); });
+        it.w = v.videoWidth; it.h = v.videoHeight; it.duration = v.duration; it.src = v;
+        await new Promise(r => { const tm = setTimeout(r, 2500); v.onseeked = () => { clearTimeout(tm); r(); }; try { v.currentTime = Math.min(0.2, (v.duration || 1) / 4); } catch (e) { r(); } });
+        it.thumb = v.readyState >= 2 ? thumbOf(v, it.w, it.h) : "";
+      } else {
+        const img = new Image(); img.src = url; await img.decode();
+        it.w = img.naturalWidth; it.h = img.naturalHeight; it.src = img; it.thumb = thumbOf(img, it.w, it.h);
+      }
+      if (!it.w || !it.h) throw new Error("size");
+      items.push(it); return true;
+    } catch (e) { URL.revokeObjectURL(url); return false; }
+  }
+
+  async function addFiles(list) {
+    if (busy || !list.length) return;
+    setStatus(S("opening"));
+    let bad = 0; const before = items.length;
+    for (const f of list) if (!(await addFile(f))) bad++;
+    if (items.length) { showWork(); sel = Math.min(before, items.length - 1); $("tip").hidden = true; refresh(); }
+    setStatus(bad ? S("cant_open", { n: bad }) : () => "", !!bad);
+  }
+
+  function showWork() { $("empty").hidden = true; $("work").hidden = false; $("bottom").hidden = false; }
+  function removeSelected() {
+    if (busy || !items[sel]) return;
+    const [it] = items.splice(sel, 1); if (it.url) URL.revokeObjectURL(it.url);
+    if (!items.length) { sel = 0; $("empty").hidden = false; $("work").hidden = true; $("bottom").hidden = true; setStatus(() => ""); return; }
+    sel = Math.min(sel, items.length - 1); refresh();
+  }
+
+  function makeDemo() {
+    const c = document.createElement("canvas"); c.width = 2400; c.height = 1000;
+    const x = c.getContext("2d"), g = x.createLinearGradient(0, 0, 0, 1000);
+    g.addColorStop(0, "#1d2b64"); g.addColorStop(.55, "#f0846b"); g.addColorStop(1, "#f9d29d");
+    x.fillStyle = g; x.fillRect(0, 0, 2400, 1000);
+    x.fillStyle = "#ffe8b0"; x.beginPath(); x.arc(1560, 640, 110, 0, 7); x.fill();
+    const ridge = (b, a, col, s) => { x.fillStyle = col; x.beginPath(); x.moveTo(0, 1000);
+      for (let i = 0; i <= 2400; i += 20) x.lineTo(i, b - a * (Math.sin(i / 210 + s) * .6 + Math.sin(i / 77 + s * 2) * .25 + Math.sin(i / 530) * .5));
+      x.lineTo(2400, 1000); x.fill(); };
+    ridge(700, 160, "#6b4a7a", 1); ridge(800, 120, "#3d2f5c", 3); ridge(900, 80, "#1e1a33", 5);
+    return new Promise(r => c.toBlob(b => r(new File([b], "example-panorama.png", { type: "image/png" })), "image/png"));
+  }
+
+  // ---------- AI fill (LaMa, runs on the phone) ----------
+  let aiSession = null, aiBroken = false;
+  const wantsAI = (p) => opt("bg") === "ai" && !IN_CLAUDE && !aiBroken && p.padded;
+
+  function loadScript(src) {
+    return new Promise((res, rej) => { const sc = document.createElement("script"); sc.src = src; sc.onload = res; sc.onerror = () => rej(new Error("script")); document.head.append(sc); });
+  }
+  async function modelIsCached() {
+    try { return !!(await (await caches.open(MODEL_CACHE)).match(MODEL_URL)); } catch (e) { return false; }
+  }
+  async function getModel(onProgress) {
+    let cache = null;
+    try { cache = await caches.open(MODEL_CACHE); const hit = await cache.match(MODEL_URL); if (hit) return await hit.arrayBuffer(); } catch (e) {}
+    const res = await fetch(MODEL_URL);
+    if (!res.ok || !res.body) throw new Error("download");
+    const total = +res.headers.get("content-length") || 208e6;
+    const reader = res.body.getReader(), parts = []; let got = 0;
+    for (;;) { const { done, value } = await reader.read(); if (done) break; parts.push(value); got += value.length; onProgress(Math.min(0.99, got / total)); }
+    const blob = new Blob(parts);
+    try { if (cache) await cache.put(MODEL_URL, new Response(blob, { headers: { "content-type": "application/octet-stream" } })); } catch (e) {}
+    return await blob.arrayBuffer();
+  }
+  async function getSession(onProgress) {
+    if (aiSession) return aiSession;
+    if (!window.ort) await loadScript(ORT_BASE + "ort.webgpu.min.js");
+    ort.env.wasm.wasmPaths = ORT_BASE;
+    const buf = await getModel(onProgress);
+    setStatus(S("ai_loading"));
+    try { aiSession = await ort.InferenceSession.create(buf, { executionProviders: ["webgpu"] }); }
+    catch (e) { aiSession = await ort.InferenceSession.create(buf, { executionProviders: ["wasm"] }); }
+    return aiSession;
+  }
+  function askDownload() {
+    return new Promise(res => {
+      $("aiSheet").hidden = false;
+      const done = (v) => { $("aiSheet").hidden = true; $("aiYes").onclick = $("aiNo").onclick = null; res(v); };
+      $("aiYes").onclick = () => done(true); $("aiNo").onclick = () => done(false);
+    });
+  }
+
+  // One 512×512 pass of the model over a square window [sx, sy, L] of the canvas.
+  const NET = 512, netC = document.createElement("canvas"); netC.width = netC.height = NET;
+  async function inpaintWindow(canvas, sx, sy, L, hole) {
+    const nctx = netC.getContext("2d", { willReadFrequently: true });
+    nctx.imageSmoothingQuality = "high";
+    nctx.clearRect(0, 0, NET, NET); nctx.drawImage(canvas, sx, sy, L, L, 0, 0, NET, NET);
+    const px = nctx.getImageData(0, 0, NET, NET).data, A = NET * NET;
+    const img = new Float32Array(3 * A), msk = new Float32Array(A), f = L / NET, grow = 3 * f;
+    for (let y = 0, i = 0; y < NET; y++) {
+      const oy = sy + (y + 0.5) * f;
+      for (let x = 0; x < NET; x++, i++) {
+        const ox = sx + (x + 0.5) * f;
+        const m = ox >= hole.x0 - grow && ox < hole.x1 + grow && oy >= hole.y0 - grow && oy < hole.y1 + grow;
+        msk[i] = m ? 1 : 0;
+        if (!m) { const k = i * 4; img[i] = px[k] / 255; img[i + A] = px[k + 1] / 255; img[i + 2 * A] = px[k + 2] / 255; }
+      }
+    }
+    const names = aiSession.inputNames;
+    const feeds = {};
+    feeds[names.includes("image") ? "image" : names[0]] = new ort.Tensor("float32", img, [1, 3, NET, NET]);
+    feeds[names.includes("mask") ? "mask" : names[1]] = new ort.Tensor("float32", msk, [1, 1, NET, NET]);
+    const out = (await aiSession.run(feeds))[aiSession.outputNames[0]].data;
+    let mx = 0; for (let i = 0; i < out.length; i += 101) if (out[i] > mx) mx = out[i];
+    const mul = mx <= 1.5 ? 255 : 1; // some exports return 0–1, others 0–255
+    const id = nctx.createImageData(NET, NET), d = id.data;
+    for (let i = 0; i < A; i++) { const k = i * 4; d[k] = out[i] * mul; d[k + 1] = out[i + A] * mul; d[k + 2] = out[i + 2 * A] * mul; d[k + 3] = 255; }
+    const oc = document.createElement("canvas"); oc.width = oc.height = NET; oc.getContext("2d").putImageData(id, 0, 0);
+    return oc;
+  }
+
+  // Plan the windows that cover each strip; neighbours overlap and are blended.
+  function aiJobs(W, H, box) {
+    const { dx, dy, dw, dh } = box, jobs = [];
+    const side = (vertical, holeA, holeB, s) => {
+      const len = vertical ? H : W;                      // length of the strip
+      const L = Math.max(1, Math.round(Math.min(W, H, Math.max(1024, 4 * s))));
+      const n = L >= len ? 1 : Math.ceil((len - L) / (L * 0.7)) + 1;
+      for (const hole of [holeA, holeB]) {
+        if (hole.x1 - hole.x0 < 1 || hole.y1 - hole.y0 < 1) continue;
+        for (let i = 0; i < n; i++) {
+          const along = n === 1 ? 0 : Math.round(i * (len - L) / (n - 1));
+          const sx = vertical ? (hole.x0 === 0 ? 0 : W - L) : along;
+          const sy = vertical ? along : (hole.y0 === 0 ? 0 : H - L);
+          const prev = i === 0 ? null : Math.round((i - 1) * (len - L) / (n - 1));
+          jobs.push({ sx, sy, L, hole, vertical, overlap: prev === null ? 0 : prev + L - along });
+        }
+      }
+    };
+    if (dx > 0) side(true, { x0: 0, y0: 0, x1: dx, y1: H }, { x0: dx + dw, y0: 0, x1: W, y1: H }, Math.max(dx, W - dx - dw));
+    if (dy > 0) side(false, { x0: 0, y0: 0, x1: W, y1: dy }, { x0: 0, y0: dy + dh, x1: W, y1: H }, Math.max(dy, H - dy - dh));
+    return jobs;
+  }
+
+  // Paints the strips of `canvas` (photo already drawn in the middle) with AI.
+  async function aiFillCanvas(canvas, box, onStep) {
+    const ctx = canvas.getContext("2d"), jobs = aiJobs(canvas.width, canvas.height, box);
+    const tmp = document.createElement("canvas");
+    for (let j = 0; j < jobs.length; j++) {
+      if (cancelReq) return false;
+      onStep(j + 1, jobs.length);
+      const { sx, sy, L, hole, vertical, overlap } = jobs[j];
+      const oc = await inpaintWindow(canvas, sx, sy, L, hole);
+      tmp.width = tmp.height = L;
+      const tc = tmp.getContext("2d"); tc.imageSmoothingQuality = "high";
+      tc.globalCompositeOperation = "copy"; tc.drawImage(oc, 0, 0, L, L);
+      if (overlap > 0) { // fade in over the previous window so there's no seam
+        const g = vertical ? tc.createLinearGradient(0, 0, 0, overlap) : tc.createLinearGradient(0, 0, overlap, 0);
+        g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,1)");
+        tc.globalCompositeOperation = "destination-in"; tc.fillStyle = g; tc.fillRect(0, 0, L, L); // gradient stays opaque past the overlap
+      }
+      ctx.save(); ctx.beginPath(); ctx.rect(hole.x0, hole.y0, hole.x1 - hole.x0, hole.y1 - hole.y0); ctx.clip();
+      ctx.drawImage(tmp, sx, sy); ctx.restore();
+      await new Promise(r => setTimeout(r, 0)); // let the screen update between passes
+    }
+    return true;
+  }
+
+  function placeBox(sw, sh, W, H) {
+    const s = Math.min(W / sw, H / sh), dw = Math.round(sw * s), dh = Math.round(sh * s);
+    return { dx: Math.round((W - dw) / 2), dy: Math.round((H - dh) / 2), dw, dh };
+  }
+  function makePreview(canvas) {
+    const k = Math.min(1, 900 / Math.max(canvas.width, canvas.height));
+    const c = document.createElement("canvas"); c.width = Math.round(canvas.width * k); c.height = Math.round(canvas.height * k);
+    const x = c.getContext("2d"); x.imageSmoothingQuality = "high"; x.drawImage(canvas, 0, 0, c.width, c.height);
+    return c;
+  }
+
+  // ---------- Converting ----------
+  const outName = (it, p, ext) => `${it.name.replace(/\.[^.]+$/, "")}_ig_${ratioName(p.W / p.H).replace(":", "x")}.${ext}`;
+
+  function render2(c, src, sw, sh, box) {
+    const ctx = c.getContext("2d"); ctx.imageSmoothingQuality = "high";
+    if (box.dw === sw && box.dh === sh) ctx.drawImage(src, box.dx, box.dy); else ctx.drawImage(src, box.dx, box.dy, box.dw, box.dh);
+  }
+
+  async function convertImage(it, onStep) {
+    const p = plan(it);
+    if (p.untouched) return { blob: it.file, name: it.name };
+    const c = document.createElement("canvas"); c.width = p.W; c.height = p.H;
+    render(c.getContext("2d"), it.src, it.w, it.h, p.W, p.H);
+    if (wantsAI(p)) {
+      try {
+        const box = placeBox(it.w, it.h, p.W, p.H);
+        if (!(await aiFillCanvas(c, box, (k, n) => onStep(k, n)))) return null;
+        render2(c, it.src, it.w, it.h, box); // put the untouched photo back on top, pixel-exact
+      } catch (e) { aiBroken = true; render(c.getContext("2d"), it.src, it.w, it.h, p.W, p.H); }
+    }
+    it.preview = makePreview(c);
+    const jpg = opt("fmt") === "jpg";
+    const blob = await new Promise(r => c.toBlob(r, jpg ? "image/jpeg" : "image/png", 1));
+    c.width = c.height = 0; // free memory on phones
+    if (!blob) throw new Error("err_large");
+    return { blob, name: outName(it, p, jpg ? "jpg" : "png") };
+  }
+
+  function pickMime() {
+    const list = ["video/mp4;codecs=avc1.640033,mp4a.40.2", "video/mp4;codecs=avc1.4d0033,mp4a.40.2", "video/mp4;codecs=avc1,mp4a.40.2", "video/mp4", "video/webm;codecs=vp9,opus", "video/webm"];
+    return window.MediaRecorder ? list.find(m => MediaRecorder.isTypeSupported(m)) : null;
+  }
+
+  let wakeLock = null;
+  async function keepAwake(on) {
+    try {
+      if (on && "wakeLock" in navigator) wakeLock = await navigator.wakeLock.request("screen");
+      else if (!on && wakeLock) { await wakeLock.release(); wakeLock = null; }
+    } catch (e) {}
+  }
+
+  async function convertVideo(it, onProgress, onStep) {
+    const p = plan(it);
+    if (p.untouched) return { blob: it.file, name: it.name };
+    const mime = pickMime();
+    if (!mime || !HTMLCanvasElement.prototype.captureStream) throw new Error("err_video_browser");
+    const isMp4 = mime.startsWith("video/mp4");
+
+    const host = document.createElement("div"); host.className = "vh"; document.body.append(host);
+    let v = it._v;
+    if (!v) { v = document.createElement("video"); v.playsInline = true; v.setAttribute("playsinline", ""); v.preload = "auto"; v.src = it.url; }
+    host.append(v); v.pause();
+    if (v.readyState < 2) await new Promise((res, rej) => { v.onloadeddata = res; v.onerror = () => rej(new Error("err_video_read")); });
+    v.currentTime = 0;
+
+    const c = document.createElement("canvas"); c.width = p.W; c.height = p.H; host.append(c);
+    const ctx = c.getContext("2d", { alpha: false });
+    const pv = $("preview"), pctx = pv.getContext("2d");
+
+    // AI keyframes: paint the edges at a few moments, then blend between them while recording
+    let keys = null, K = 1;
+    const box = placeBox(it.w, it.h, p.W, p.H);
+    if (wantsAI(p)) {
+      try {
+        const dur0 = v.duration || it.duration || 1;
+        const count = Math.max(2, Math.min(12, Math.ceil(dur0 / 2) + 1));
+        K = dur0 / (count - 1); keys = [];
+        for (let i = 0; i < count; i++) {
+          if (cancelReq) break;
+          await new Promise(r => { const tm = setTimeout(r, 3000); v.onseeked = () => { clearTimeout(tm); r(); }; v.currentTime = Math.min(dur0 - 0.05, i * K); });
+          render(ctx, v, it.w, it.h, p.W, p.H);
+          const ok = await aiFillCanvas(c, box, () => onStep(i + 1, count, "ai_video"));
+          if (!ok) break;
+          const kc = document.createElement("canvas"); kc.width = p.W; kc.height = p.H;
+          kc.getContext("2d").drawImage(c, 0, 0); keys.push(kc);
+          if (items[sel] === it) pctx.drawImage(c, 0, 0, pv.width, pv.height);
+        }
+        if (cancelReq) { host.remove(); return null; }
+        await new Promise(r => { const tm = setTimeout(r, 3000); v.onseeked = () => { clearTimeout(tm); r(); }; v.currentTime = 0; });
+      } catch (e) { aiBroken = true; keys = null; }
+    }
+    const draw = () => {
+      if (keys && keys.length) {
+        const pos = Math.min(keys.length - 1, v.currentTime / K), a = Math.floor(pos), b = Math.min(keys.length - 1, a + 1), f = pos - a;
+        ctx.globalAlpha = 1; ctx.drawImage(keys[a], 0, 0);
+        if (f > 0 && b !== a) { ctx.globalAlpha = f; ctx.drawImage(keys[b], 0, 0); ctx.globalAlpha = 1; }
+        render2(c, v, it.w, it.h, box);
+      } else render(ctx, v, it.w, it.h, p.W, p.H);
+      if (items[sel] === it) pctx.drawImage(c, 0, 0, pv.width, pv.height);
+    };
+    draw();
+
+    const stream = c.captureStream(60);
+    if (it._dest) it._dest.stream.getAudioTracks().forEach(tr => stream.addTrack(tr)); else v.muted = true;
+
+    const dur = v.duration || it.duration || 1;
+    const srcBps = (it.file.size * 8) / dur;
+    const vbps = Math.round(Math.min(60e6, Math.max(16e6, srcBps * 1.5 * Math.sqrt((p.W * p.H) / (it.w * it.h)))));
+    const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: vbps, audioBitsPerSecond: 256000 });
+    const chunks = []; rec.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+    const stopped = new Promise(r => { rec.onstop = r; });
+    let ended = false;
+    const finish = () => { if (ended) return; ended = true; setTimeout(() => { try { rec.stop(); } catch (e) {} }, 250); };
+    v.onended = finish;
+    const loop = () => {
+      if (ended) return;
+      if (cancelReq) { v.pause(); finish(); return; }
+      draw(); onProgress(v.currentTime / dur, `${fmtTime(v.currentTime)} / ${fmtTime(dur)}`);
+      v.requestVideoFrameCallback ? v.requestVideoFrameCallback(loop) : requestAnimationFrame(loop);
+    };
+    rec.start(1000);
+    try { await v.play(); } catch (e) { finish(); await stopped; host.remove(); it._v = null; throw new Error("err_video_start"); }
+    loop();
+    await stopped;
+    stream.getVideoTracks().forEach(tr => tr.stop());
+    if (!cancelReq) it.preview = makePreview(c);
+    host.remove();
+    if (cancelReq) return null;
+    const blob = new Blob(chunks, { type: isMp4 ? "video/mp4" : "video/webm" });
+    if (!blob.size) throw new Error("err_video_empty");
+    return { blob, name: outName(it, p, isMp4 ? "mp4" : "webm"), webm: !isMp4 };
+  }
+
+  let audioCtx = null;
+  function primeVideos() { // must run synchronously inside the Convert tap
+    try { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); audioCtx.resume(); } catch (e) { audioCtx = null; }
+    for (const it of items) {
+      if (it.kind !== "video" || it.status === "done" || it._v) continue;
+      const v = document.createElement("video");
+      v.playsInline = true; v.setAttribute("playsinline", ""); v.preload = "auto"; v.src = it.url;
+      if (audioCtx) { try { const node = audioCtx.createMediaElementSource(v); it._dest = audioCtx.createMediaStreamDestination(); node.connect(it._dest); } catch (e) { it._dest = null; } }
+      const pr = v.play(); if (pr && pr.then) pr.then(() => { v.pause(); v.currentTime = 0; }).catch(() => {});
+      it._v = v;
+    }
+  }
+
+  async function convertAll() {
+    if (busy) return;
+    primeVideos();
+    const needAI = items.some(i => i.status !== "done" && wantsAI(plan(i)));
+    if (needAI && !aiSession && !(await modelIsCached()) && !(await askDownload())) { setStatus(S("ai_declined")); return; }
+    busy = true; cancelReq = false; $("tip").hidden = true; updateButtons();
+    $("prog").hidden = false;
+    if (needAI && !aiSession) {
+      try { await getSession((f) => { $("prog").firstElementChild.style.width = `${f * 100}%`; setStatus(S("ai_downloading", { p: Math.round(f * 100) })); }); }
+      catch (e) { aiBroken = true; }
+      $("prog").firstElementChild.style.width = "0";
+    }
+    const queue = items.filter(i => i.status !== "done");
+    const hasVideo = queue.some(i => i.kind === "video");
+    $("cancelBtn").hidden = !hasVideo; $("prog").hidden = false;
+    if (hasVideo) keepAwake(true);
+    let n = 0, webm = false;
+    for (const it of queue) {
+      if (cancelReq) break;
+      n++; it.status = "working"; sel = items.indexOf(it); refresh();
+      const k = n, total = queue.length;
+      const prog = (f, fn) => { $("prog").firstElementChild.style.width = `${(((k - 1) + Math.min(1, f)) / total) * 100}%`; setStatus(() => (total > 1 ? t("file_of", { k, n: total }) : "") + fn()); };
+      try {
+        prog(0, S(it.kind === "video" ? "prep_video" : "prep_photo"));
+        const step = (j, m, key) => prog(0, S(key || "ai_filling", { k: j, n: m }));
+        const out = it.kind === "video" ? await convertVideo(it, (f, tm) => prog(f, S("encoding", { t: tm })), step) : await convertImage(it, step);
+        if (!out) { it.status = "ready"; break; }
+        it.out = out; it.status = "done"; if (out.webm) webm = true;
+        if (it.kind === "video") { it._v = null; it._dest = null; }
+      } catch (e) { it.status = "error"; it.err = I18N.en[e.message] ? e.message : "some_failed"; }
+      prog(1, () => "");
+      drawStrip();
+    }
+    keepAwake(false);
+    busy = false; $("cancelBtn").hidden = true;
+    setTimeout(() => { $("prog").hidden = true; $("prog").firstElementChild.style.width = "0"; }, 500);
+    refresh();
+    const errItem = items.find(i => i.status === "error");
+    if (cancelReq) setStatus(S("canceled"));
+    else if (errItem) setStatus(S(errItem.err), true);
+    else if (webm) setStatus(S("webm_warn"), true);
+    else if (aiBroken && opt("bg") === "ai" && !IN_CLAUDE) setStatus(S("ai_failed"), true);
+    else setStatus(S("done_save"));
+  }
+
+  // ---------- Saving ----------
+  let claudeDownloads = null; // available when opened inside the Claude app
+  try { window.claude?.use?.("downloads").then(d => { claudeDownloads = d; }).catch(() => {}); } catch (e) {}
+
+  function toFile(o) {
+    if (o.blob instanceof File && o.blob.name === o.name) return o.blob;
+    return new File([o.blob], o.name, { type: o.blob.type || (/\.png$/i.test(o.name) ? "image/png" : /\.mp4$/i.test(o.name) ? "video/mp4" : "image/jpeg") });
+  }
+  function afterSave(n) {
+    setStatus(() => t("saved", { n }) + (isIOS ? " " + t("ios_save") : ""));
+    $("tip").hidden = false;
+    $("tip").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+  async function saveAll() {
+    const files = items.filter(i => i.status === "done" && i.out).map(i => toFile(i.out));
+    if (!files.length) return;
+    if (claudeDownloads) {
+      let saved = 0;
+      for (const f of files) {
+        try { await claudeDownloads.save({ filename: f.name, data: f }); saved++; }
+        catch (e) {
+          if (e && e.code === "declined") { setStatus(saved ? S("saved_some", { n: saved }) : S("save_canceled")); if (saved) $("tip").hidden = false; return; }
+          if (e && e.code === "rate_limited") { setStatus(S("prompt_open"), true); return; }
+          setStatus(S("save_unavail"), true); return;
+        }
+      }
+      afterSave(saved); return;
+    }
+    if (navigator.canShare && navigator.canShare({ files })) {
+      try { await navigator.share({ files }); afterSave(files.length); return; }
+      catch (e) { if (e.name === "AbortError") { setStatus(S("save_canceled")); return; } }
+    }
+    files.forEach((f, i) => setTimeout(() => {
+      const a = document.createElement("a"), u = URL.createObjectURL(f);
+      a.href = u; a.download = f.name; document.body.append(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(u), 30000);
+    }, i * 400));
+    setStatus(S("downloading")); $("tip").hidden = false;
+  }
+
+  // ---------- Install ----------
+  let deferredPrompt = null;
+  const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+  window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferredPrompt = e; $("installBtn").hidden = false; });
+  if (isIOS && !standalone) $("installBtn").hidden = false;
+  $("installBtn").addEventListener("click", async () => {
+    if (deferredPrompt) { deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; $("installBtn").hidden = true; }
+    else $("iosSheet").hidden = false;
+  });
+  $("iosClose").addEventListener("click", () => { $("iosSheet").hidden = true; });
+  window.addEventListener("appinstalled", () => { $("installBtn").hidden = true; });
+  if ("serviceWorker" in navigator && location.protocol !== "file:") navigator.serviceWorker.register("sw.js").catch(() => {});
+
+  // ---------- Wiring ----------
+  $("langSel").innerHTML = LANGS.map(([c, n]) => `<option value="${c}">${n}</option>`).join("");
+  $("langSel").addEventListener("change", (e) => { lang = e.target.value; store.set("uncrop-lang", lang); applyLang(); });
+  $("pickFirst").addEventListener("click", () => $("file").click());
+  $("file").addEventListener("change", (e) => { const list = [...e.target.files]; e.target.value = ""; addFiles(list); });
+  $("tryDemo").addEventListener("click", async () => addFiles([await makeDemo()]));
+  $("removeBtn").addEventListener("click", removeSelected);
+  $("goBtn").addEventListener("click", () => $("goBtn").dataset.mode === "save" ? saveAll() : convertAll());
+  $("cancelBtn").addEventListener("click", () => { cancelReq = true; });
+  document.querySelectorAll('input[name="bg"],input[name="res"],input[name="fmt"]').forEach(i => i.addEventListener("change", () => { updateAutoHint(); invalidate(); }));
+  if (IN_CLAUDE) { $("bg-ai").disabled = true; $("aiNote").hidden = false; } else $("bg-ai").checked = true; // AI fill is the default in the installed app
+  document.addEventListener("dragover", (e) => e.preventDefault());
+  document.addEventListener("drop", (e) => { e.preventDefault(); addFiles([...e.dataTransfer.files]); });
+  applyLang();
+})();
+</script>
+</body>
+</html>
