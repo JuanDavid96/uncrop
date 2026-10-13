@@ -4,11 +4,11 @@ A phone app that lets Instagram show your whole photo or video. It adds the thin
 
 ## AI fill
 
-- Uses LaMa, an open-source image fill-in model (Apache-2.0), run on the phone with ONNX Runtime Web. Model file: huggingface.co/Carve/LaMa-ONNX. LaMa was trained on the Places2 dataset (CC-BY 4.0); credit: Suvorov et al., "Resolution-robust Large Mask Inpainting with Fourier Convolutions" (2021).
-- The first time you use it, the app asks before downloading the model (about 200 MB). Use Wi-Fi. It's kept on the phone and works offline afterwards.
+- Uses LaMa, an open-source image fill-in model (Apache-2.0), run on the phone with ONNX Runtime Web. The model file is OpenCV Zoo's compressed build (`inpainting_lama_2025jan.onnx`, 93 MB), stored in `models/` in four parts. LaMa was trained on the Places2 dataset (CC-BY 4.0); credit: Suvorov et al., "Resolution-robust Large Mask Inpainting with Fourier Convolutions" (2021).
+- The first time you use it, the app asks before downloading the model (about 90 MB). Use Wi-Fi. It's kept on the phone and works offline afterwards.
 - Takes roughly 10–60 seconds per photo, depending on the phone. Newer phones use the graphics chip and are much faster.
 - Videos: the AI paints the edges at several moments through the video (about every 2 seconds, up to 12 times) and the app blends smoothly between them while recording.
-- If the AI can't run on a phone (for example, not enough memory), the app automatically uses a plain strip and says so.
+- The app tests the AI once before using it: first on the phone's graphics chip, then on its main processor. If neither works (for example, not enough memory), it uses a plain strip and shows the reason in brackets.
 - AI fill only works in the installed app. The preview inside the Claude app can't download the model.
 
 Available in English, Spanish, Portuguese, French, German and Italian. It follows the phone's language automatically; tap the language button at the top to switch.
@@ -56,7 +56,7 @@ Phones can only install the app from an `https://` address. Pick one:
 
 ## Updating the app
 
-After changing any file, open `sw.js` and raise the version number in `uncrop-v11` by one, then upload again. Installed copies update the next time they're opened.
+After changing any file, open `sw.js` and raise the version number in `uncrop-v12` by one, then upload again. Installed copies update the next time they're opened.
 
 ## Putting it in the App Store / Google Play (optional)
 
