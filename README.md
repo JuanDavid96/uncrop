@@ -6,9 +6,9 @@ A phone app that lets Instagram show your whole photo or video. It adds the thin
 
 - Works with no account: Hugging Face gives visitors a small free daily allowance (about 2 minutes of AI time, a few photos).
 - Optional: for more photos per day, tap **Get more photos a day (free account)** under AI fill and paste a free Hugging Face token (huggingface.co/join, then huggingface.co/settings/tokens → Create new token → Read). It's stored only on your phone.
-- Photos are then expanded by a large online AI built for this (the public Hugging Face demo "fffiloni/diffusers-image-outpaint": SDXL with ControlNet), which paints sharp, realistic new scenery. Your original photo is put back on top, and its outermost band (about 3.5% of its width) is faded into the AI's version of that band so the new scenery continues with no visible line; the rest of the photo is untouched. Where two painted sections meet, they're joined along the line where they match best.
-- Without an account you get about 2 minutes of AI time per day; free Hugging Face accounts get about 5 minutes (roughly 5–25 photos, depending on size: big photos use 4–6 requests). When it runs out, or the service can't be reached, the app falls back to the on-phone AI (or a plain strip) and says why.
-- The online AI works at up to 1536 px per request. On big photos the app paints each strip in 2–3 overlapping sections, each close to the photo's own resolution, then blends them, color-matches each section to the photo edge and adds matching camera grain. Small photos use a single request.
+- Photos are then expanded by a large online AI built for this (the public Hugging Face demo "fffiloni/diffusers-image-outpaint": SDXL with ControlNet), which paints sharp, realistic new scenery. Your original photo is put back on top, and its outermost band (about 6% of its width) is faded into the AI's version of that band so the new scenery continues with no visible line; the rest of the photo is untouched.
+- Without an account you get about 2 minutes of AI time per day; free Hugging Face accounts get about 5 minutes (roughly 15–30 photos). When it runs out, or the service can't be reached, the app falls back to the on-phone AI (or a plain strip) and says why.
+- The whole photo goes to the online AI in one request, so it paints one coherent scene. It works at up to 1536 px, which is more than Instagram's 1080 px display; zoomed in on a phone, the new edges are a bit softer than a big original.
 - Photos are sent to Hugging Face for processing. Videos always use the on-phone AI.
 - This depends on a public demo that someone else runs; if it's ever removed or changed, the app falls back automatically.
 
@@ -67,7 +67,7 @@ Phones can only install the app from an `https://` address. Pick one:
 
 ## Updating the app
 
-After changing any file, open `sw.js` and raise the version number in `uncrop-v20` by one, then upload again. Installed copies update the next time they're opened.
+After changing any file, open `sw.js` and raise the version number in `uncrop-v21` by one, then upload again. Installed copies update the next time they're opened.
 
 ## Putting it in the App Store / Google Play (optional)
 
