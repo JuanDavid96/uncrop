@@ -2,7 +2,16 @@
 
 A phone app that lets Instagram show your whole photo or video. It adds the thinnest possible strip so nothing gets cut, and by default an on-device AI paints that strip with what the rest of the scene would look like. You can also choose a plain strip (white or black, matching Instagram's light or dark mode). The picture itself is never cropped, stretched or blurred. It runs entirely on the phone: no uploads, no account, works offline once installed.
 
-## AI fill
+## Realistic AI fill (free, online)
+
+- Under Strip color → AI fill, tap **Connect free account** and paste a free Hugging Face token (huggingface.co/join, then huggingface.co/settings/tokens → Create new token → Read). It's stored only on your phone.
+- Photos are then expanded by a large online AI built for this (the public Hugging Face demo "fffiloni/diffusers-image-outpaint": SDXL with ControlNet), which paints sharp, realistic new scenery. Your original photo is put back on top pixel-for-pixel, and the new edges are color-matched to it.
+- Free Hugging Face accounts get about 5 minutes of AI time per day (roughly 15–30 photos). When it runs out, or the service can't be reached, the app falls back to the on-phone AI (or a plain strip) and says why.
+- The online AI works at up to 1536 px, so the new edges are softer than your full-resolution photo when zoomed in; at Instagram's 1080 px they look the same.
+- Photos are sent to Hugging Face for processing. Videos always use the on-phone AI.
+- This depends on a public demo that someone else runs; if it's ever removed or changed, the app falls back automatically.
+
+## AI fill (on the phone)
 
 - Uses LaMa, an open-source image fill-in model (Apache-2.0), run on the phone with ONNX Runtime Web. The model file is OpenCV Zoo's compressed build (`inpainting_lama_2025jan.onnx`, 93 MB), stored in `models/` in four parts. LaMa was trained on the Places2 dataset (CC-BY 4.0); credit: Suvorov et al., "Resolution-robust Large Mask Inpainting with Fourier Convolutions" (2021).
 - The first time you use it, the app asks before downloading the model (about 90 MB). Use Wi-Fi. It's kept on the phone and works offline afterwards.
@@ -57,7 +66,7 @@ Phones can only install the app from an `https://` address. Pick one:
 
 ## Updating the app
 
-After changing any file, open `sw.js` and raise the version number in `uncrop-v15` by one, then upload again. Installed copies update the next time they're opened.
+After changing any file, open `sw.js` and raise the version number in `uncrop-v16` by one, then upload again. Installed copies update the next time they're opened.
 
 ## Putting it in the App Store / Google Play (optional)
 
