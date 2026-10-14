@@ -775,25 +775,26 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
 
   // One 512×512 pass of the model over a square window [sx, sy, L] of the canvas.
   const NET = 512, netC = document.createElement("canvas"); netC.width = netC.height = NET;
-  async function inpaintWindow(canvas, sx, sy, L, hole) {
+  // One 512×512 pass of the model over a square window [sx, sy, L] of the canvas; `holes` are the unknown areas.
+  async function inpaintWindow(canvas, sx, sy, L, holes) {
     const nctx = netC.getContext("2d", { willReadFrequently: true });
     nctx.imageSmoothingQuality = "high";
     nctx.clearRect(0, 0, NET, NET); nctx.drawImage(canvas, sx, sy, L, L, 0, 0, NET, NET);
     const px = nctx.getImageData(0, 0, NET, NET).data, A = NET * NET;
-    const img = new Float32Array(3 * A), msk = new Float32Array(A), f = L / NET, grow = 3 * f;
+    const img = new Float32Array(3 * A), msk = new Float32Array(A), f = L / NET, grow = 1.5 * f;
     for (let y = 0, i = 0; y < NET; y++) {
       const oy = sy + (y + 0.5) * f;
       for (let x = 0; x < NET; x++, i++) {
         const ox = sx + (x + 0.5) * f;
-        const m = ox >= hole.x0 - grow && ox < hole.x1 + grow && oy >= hole.y0 - grow && oy < hole.y1 + grow;
+        let m = false;
+        for (const h of holes) if (ox >= h.x0 - grow && ox < h.x1 + grow && oy >= h.y0 - grow && oy < h.y1 + grow) { m = true; break; }
         msk[i] = m ? 1 : 0;
         if (!m) { const k = i * 4; img[i] = px[k] / 255; img[i + A] = px[k + 1] / 255; img[i + 2 * A] = px[k + 2] / 255; }
       }
     }
-    const names = aiSession.inputNames;
     const feeds = {};
-    feeds[names.includes("image") ? "image" : names[0]] = new ort.Tensor("float32", img, [1, 3, NET, NET]);
-    feeds[names.includes("mask") ? "mask" : names[1]] = new ort.Tensor("float32", msk, [1, 1, NET, NET]);
+    feeds[inName(aiSession, "image", 0)] = new ort.Tensor("float32", img, [1, 3, NET, NET]);
+    feeds[inName(aiSession, "mask", 1)] = new ort.Tensor("float32", msk, [1, 1, NET, NET]);
     const out = (await aiSession.run(feeds))[aiSession.outputNames[0]].data;
     let mx = 0; for (let i = 0; i < out.length; i += 101) if (out[i] > mx) mx = out[i];
     const mul = mx <= 1.5 ? 255 : 1; // some exports return 0–1, others 0–255
@@ -803,51 +804,92 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
     return oc;
   }
 
-  // Plan the windows that cover each strip; neighbours overlap and are blended.
-  function aiJobs(W, H, box, maxPerSide) {
-    const { dx, dy, dw, dh } = box, jobs = [];
-    const side = (vertical, holeA, holeB, s) => {
-      const len = vertical ? H : W;                      // length of the strip
-      // window side: big enough for context, and big enough that each strip needs at most maxPerSide passes
-      let L = Math.max(1024, 4 * s, Math.ceil(len / (1 + 0.7 * (maxPerSide - 1))));
-      L = Math.max(1, Math.round(Math.min(W, H, L)));
-      const n = L >= len ? 1 : Math.ceil((len - L) / (L * 0.7)) + 1;
-      for (const hole of [holeA, holeB]) {
-        if (hole.x1 - hole.x0 < 1 || hole.y1 - hole.y0 < 1) continue;
-        for (let i = 0; i < n; i++) {
-          const along = n === 1 ? 0 : Math.round(i * (len - L) / (n - 1));
-          const sx = vertical ? (hole.x0 === 0 ? 0 : W - L) : along;
-          const sy = vertical ? along : (hole.y0 === 0 ? 0 : H - L);
-          const prev = i === 0 ? null : Math.round((i - 1) * (len - L) / (n - 1));
-          jobs.push({ sx, sy, L, hole, vertical, overlap: prev === null ? 0 : prev + L - along });
-        }
-      }
-    };
-    if (dx > 0) side(true, { x0: 0, y0: 0, x1: dx, y1: H }, { x0: dx + dw, y0: 0, x1: W, y1: H }, Math.max(dx, W - dx - dw));
-    if (dy > 0) side(false, { x0: 0, y0: 0, x1: W, y1: dy }, { x0: 0, y0: dy + dh, x1: W, y1: H }, Math.max(dy, H - dy - dh));
-    return jobs;
+  // This AI only fills gaps well when they're thin compared to what it sees (about 1/10 of its view);
+  // wider gaps come out as dark smears. So the photo is grown outward in thin steps, each new slice
+  // painted right next to real (or already painted) picture. It also paints a little wider than
+  // needed and trims that outer sliver, because fills touching the outer border come out darker.
+  const STEP_NET = 44, EXTRA = 0.10;
+
+  function rot90(src, back) {
+    const c = document.createElement("canvas");
+    c.width = src.height; c.height = src.width;
+    const x = c.getContext("2d");
+    if (back) { x.translate(0, src.width); x.rotate(-Math.PI / 2); } else { x.translate(src.height, 0); x.rotate(Math.PI / 2); }
+    x.drawImage(src, 0, 0);
+    x.setTransform(1, 0, 0, 1, 0, 0); // later drawing on this canvas must not be rotated
+    return c;
   }
 
-  // Paints the strips of `canvas` (photo already drawn in the middle) with AI.
-  async function aiFillCanvas(canvas, box, onStep, maxPerSide = 4) {
-    const ctx = canvas.getContext("2d"), jobs = aiJobs(canvas.width, canvas.height, box, aiOnCPU ? maxPerSide : 8);
-    const tmp = document.createElement("canvas");
-    for (let j = 0; j < jobs.length; j++) {
-      if (cancelReq) return false;
-      onStep(j + 1, jobs.length);
-      const { sx, sy, L, hole, vertical, overlap } = jobs[j];
-      const oc = await inpaintWindow(canvas, sx, sy, L, hole);
-      tmp.width = tmp.height = L;
-      const tc = tmp.getContext("2d"); tc.imageSmoothingQuality = "high";
-      tc.globalCompositeOperation = "copy"; tc.drawImage(oc, 0, 0, L, L);
-      if (overlap > 0) { // fade in over the previous window so there's no seam
-        const g = vertical ? tc.createLinearGradient(0, 0, 0, overlap) : tc.createLinearGradient(0, 0, overlap, 0);
-        g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,1)");
-        tc.globalCompositeOperation = "destination-in"; tc.fillStyle = g; tc.fillRect(0, 0, L, L); // gradient stays opaque past the overlap
+  // Grows a canvas whose known columns are [kl, kr) out to its left and right edges.
+  async function growSides(canvas, kl, kr, stepNet, onStep) {
+    const W = canvas.width, H = canvas.height, E = Math.round(W * EXTRA), WW = W + 2 * E;
+    const big = document.createElement("canvas"); big.width = WW; big.height = H;
+    const bctx = big.getContext("2d"); bctx.imageSmoothingQuality = "high";
+    bctx.drawImage(canvas, E, 0);
+    kl += E; kr += E;
+    const L = Math.min(WW, H), step = Math.max(1, Math.floor(stepNet * L / NET));
+    const n = L >= H ? 1 : Math.ceil((H - L) / (L * 0.7)) + 1;
+    const xs = L >= WW ? [0] : [...new Set([0, Math.floor((WW - L) / 2), WW - L])];
+    const steps = Math.ceil(Math.max(kl, WW - kr) / step);
+    let done = 0; const total = steps * n * xs.length;
+    const tmp = document.createElement("canvas"); tmp.width = tmp.height = L;
+    const tc = tmp.getContext("2d"); tc.imageSmoothingQuality = "high";
+    while (kl > 0 || kr < WW) {
+      const nl = Math.max(0, kl - step), nr = Math.min(WW, kr + step);
+      const holes = [];
+      if (kl > 0) holes.push({ x0: 0, x1: kl, y0: 0, y1: H });
+      if (kr < WW) holes.push({ x0: kr, x1: WW, y0: 0, y1: H });
+      const bands = [[nl, kl], [kr, nr]].filter(([a, b]) => b > a);
+      for (const sx of xs) {
+        if (!bands.some(([a, b]) => b > sx && a < sx + L)) { done += n; continue; }
+        let prevEnd = null;
+        for (let i = 0; i < n; i++) {
+          if (cancelReq) return false;
+          const sy = n === 1 ? 0 : Math.round(i * (H - L) / (n - 1));
+          onStep(++done, total);
+          const oc = await inpaintWindow(big, sx, sy, L, holes);
+          tc.globalCompositeOperation = "copy"; tc.drawImage(oc, 0, 0, L, L);
+          const ov = prevEnd === null ? 0 : prevEnd - sy;
+          if (ov > 0) { // fade in over the previous window so there's no seam
+            const g = tc.createLinearGradient(0, 0, 0, ov);
+            g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,1)");
+            tc.globalCompositeOperation = "destination-in"; tc.fillStyle = g; tc.fillRect(0, 0, L, L);
+          }
+          bctx.save(); bctx.beginPath();
+          for (const [a, b] of bands) bctx.rect(a, sy, b - a, L);
+          bctx.clip(); bctx.drawImage(tmp, sx, sy); bctx.restore();
+          // soften the joint with the previous slice: fade the new paint a little way inward
+          const fw = Math.max(2, Math.round(step * 0.35)), SL = 6;
+          for (let k = 0; k < SL; k++) {
+            bctx.save(); bctx.globalAlpha = 1 - (k + 0.5) / SL; bctx.beginPath();
+            const a0 = Math.round(k * fw / SL), a1 = Math.round((k + 1) * fw / SL);
+            if (kl > 0) bctx.rect(kl + a0, sy, a1 - a0, L);
+            if (kr < WW) bctx.rect(kr - a1, sy, a1 - a0, L);
+            bctx.clip(); bctx.drawImage(tmp, sx, sy); bctx.restore();
+          }
+          prevEnd = sy + L;
+          await new Promise(r => setTimeout(r, 0)); // let the screen update between passes
+        }
       }
-      ctx.save(); ctx.beginPath(); ctx.rect(hole.x0, hole.y0, hole.x1 - hole.x0, hole.y1 - hole.y0); ctx.clip();
-      ctx.drawImage(tmp, sx, sy); ctx.restore();
-      await new Promise(r => setTimeout(r, 0)); // let the screen update between passes
+      kl = nl; kr = nr;
+    }
+    const ctx = canvas.getContext("2d");
+    ctx.globalCompositeOperation = "copy"; ctx.drawImage(big, E, 0, W, H, 0, 0, W, H); ctx.globalCompositeOperation = "source-over";
+    return true;
+  }
+
+  // Paints the strips of `canvas` (photo already drawn at `box`) with AI.
+  async function aiFillCanvas(canvas, box, onStep, stepNet = STEP_NET) {
+    const { dx, dy, dw, dh } = box;
+    if (dx > 0) return growSides(canvas, dx, dx + dw, stepNet, onStep);
+    if (dy > 0) {
+      // strips above and below: turn the picture sideways, grow its sides, turn it back
+      const r = rot90(canvas, false);
+      const H = canvas.height;
+      const ok = await growSides(r, H - (dy + dh), H - dy, stepNet, onStep);
+      if (!ok) return false;
+      const b = rot90(r, true), ctx = canvas.getContext("2d");
+      ctx.globalCompositeOperation = "copy"; ctx.drawImage(b, 0, 0); ctx.globalCompositeOperation = "source-over";
     }
     return true;
   }
@@ -928,13 +970,13 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
     if (wantsAI(p)) {
       try {
         const dur0 = v.duration || it.duration || 1;
-        const count = aiOnCPU ? Math.max(2, Math.min(4, Math.ceil(dur0 / 5) + 1)) : Math.max(2, Math.min(12, Math.ceil(dur0 / 2) + 1));
+        const count = aiOnCPU ? Math.max(2, Math.min(3, Math.ceil(dur0 / 6) + 1)) : Math.max(2, Math.min(8, Math.ceil(dur0 / 2) + 1));
         K = dur0 / (count - 1); keys = [];
         for (let i = 0; i < count; i++) {
           if (cancelReq) break;
           await new Promise(r => { const tm = setTimeout(r, 3000); v.onseeked = () => { clearTimeout(tm); r(); }; v.currentTime = Math.min(dur0 - 0.05, i * K); });
           render(ctx, v, it.w, it.h, p.W, p.H);
-          const ok = await aiFillCanvas(c, box, () => onStep(i + 1, count, "ai_video"), 2);
+          const ok = await aiFillCanvas(c, box, () => onStep(i + 1, count, "ai_video"), 64);
           if (!ok) break;
           const kc = document.createElement("canvas"); kc.width = p.W; kc.height = p.H;
           kc.getContext("2d").drawImage(c, 0, 0); keys.push(kc);

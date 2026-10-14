@@ -7,6 +7,7 @@ A phone app that lets Instagram show your whole photo or video. It adds the thin
 - Uses LaMa, an open-source image fill-in model (Apache-2.0), run on the phone with ONNX Runtime Web. The model file is OpenCV Zoo's compressed build (`inpainting_lama_2025jan.onnx`, 93 MB), stored in `models/` in four parts. LaMa was trained on the Places2 dataset (CC-BY 4.0); credit: Suvorov et al., "Resolution-robust Large Mask Inpainting with Fourier Convolutions" (2021).
 - The first time you use it, the app asks before downloading the model (about 90 MB). Use Wi-Fi. It's kept on the phone and works offline afterwards.
 - Takes about a minute per photo. On iPhone it always runs on the main processor: the graphics chip gets this model's math wrong (it produced green smears), so it's skipped there.
+- This AI only fills gaps well when they're thin compared to what it sees, so the app grows the photo outward in thin steps (each slice painted next to real or already-painted picture), paints about 10% wider than needed and trims the outer sliver, and blends the joints. Large extensions still get softer and darker toward the outer edge; that's this model's limit.
 - Videos: the AI paints the edges at several moments through the video (every few seconds, up to 4 times on phones) and the app blends smoothly between them while recording.
 - Before using the AI, the app runs a known-answer test (a color gradient with a hole that should be filled with the matching gradient). Any setup that fails the test is not used. If nothing passes (for example, not enough memory), it uses a plain strip and shows the reason in brackets.
 - AI fill only works in the installed app. The preview inside the Claude app can't download the model.
@@ -56,7 +57,7 @@ Phones can only install the app from an `https://` address. Pick one:
 
 ## Updating the app
 
-After changing any file, open `sw.js` and raise the version number in `uncrop-v13` by one, then upload again. Installed copies update the next time they're opened.
+After changing any file, open `sw.js` and raise the version number in `uncrop-v14` by one, then upload again. Installed copies update the next time they're opened.
 
 ## Putting it in the App Store / Google Play (optional)
 
