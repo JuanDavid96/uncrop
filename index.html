@@ -859,7 +859,7 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
           for (const [a, b] of bands) bctx.rect(a, sy, b - a, L);
           bctx.clip(); bctx.drawImage(tmp, sx, sy); bctx.restore();
           // soften the joint with the previous slice: fade the new paint a little way inward
-          const fw = Math.max(2, Math.round(step * 0.35)), SL = 6;
+          const fw = Math.max(2, Math.round(step * 0.9)), SL = 10;
           for (let k = 0; k < SL; k++) {
             bctx.save(); bctx.globalAlpha = 1 - (k + 0.5) / SL; bctx.beginPath();
             const a0 = Math.round(k * fw / SL), a1 = Math.round((k + 1) * fw / SL);
@@ -878,16 +878,61 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
     return true;
   }
 
+  // The AI's fill drifts darker and grayer the farther it gets from the photo. This pulls the fill's
+  // broad color and brightness toward the photo's own outermost edge, row by row, gradually more toward
+  // the outer border, while keeping the AI's texture. Only the photo's edge is used, so colors from
+  // deeper inside the photo don't leak out.
+  function driftFix(canvas, x0, x1, strength = 0.8) {
+    const W = canvas.width, H = canvas.height, s = Math.max(x0, W - x1);
+    if (s <= 0) return;
+    const q = Math.max(4, Math.round(s / 6)), sw = Math.max(1, Math.floor(W / q)), sh = Math.max(1, Math.floor(H / q));
+    const mk = (w, h) => { const c = document.createElement("canvas"); c.width = w; c.height = h; const x = c.getContext("2d", { willReadFrequently: true }); x.imageSmoothingQuality = "high"; return x; };
+    const sx = mk(sw, sh); sx.drawImage(canvas, 0, 0, sw, sh);
+    const low = sx.getImageData(0, 0, sw, sh).data;
+    const m = Math.max(2, Math.round((x1 - x0) * 0.02));
+    const edgeOf = (c0) => { const e = mk(1, sh); e.drawImage(canvas, c0, 0, m, H, 0, 0, 1, sh); return e.getImageData(0, 0, 1, sh).data; };
+    const lowAt = (fx, fy, ch) => {
+      fx = Math.min(sw - 1, Math.max(0, fx)); fy = Math.min(sh - 1, Math.max(0, fy));
+      const ix = Math.floor(fx), iy = Math.floor(fy), jx = Math.min(sw - 1, ix + 1), jy = Math.min(sh - 1, iy + 1), ax = fx - ix, ay = fy - iy;
+      const g = (x, y) => low[(y * sw + x) * 4 + ch];
+      return (g(ix, iy) * (1 - ax) + g(jx, iy) * ax) * (1 - ay) + (g(ix, jy) * (1 - ax) + g(jx, jy) * ax) * ay;
+    };
+    const edgeAt = (edge, fy, ch) => { fy = Math.min(sh - 1, Math.max(0, fy)); const i = Math.floor(fy), j = Math.min(sh - 1, i + 1), a = fy - i; return edge[i * 4 + ch] * (1 - a) + edge[j * 4 + ch] * a; };
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    const side = (c0, c1, edgeCol, dist) => {
+      if (c1 <= c0) return;
+      const edge = edgeOf(edgeCol), id = ctx.getImageData(c0, 0, c1 - c0, H), d = id.data, ww = c1 - c0;
+      for (let y = 0; y < H; y++) {
+        const fy = (y + 0.5) / q - 0.5;
+        const e0 = edgeAt(edge, fy, 0), e1 = edgeAt(edge, fy, 1), e2 = edgeAt(edge, fy, 2);
+        for (let x = 0; x < ww; x++) {
+          const t = Math.min(1, Math.max(0, dist(c0 + x))), w = strength * Math.sqrt(t);
+          if (w <= 0) continue;
+          const fx = (c0 + x + 0.5) / q - 0.5, k = (y * ww + x) * 4;
+          d[k] += w * (e0 - lowAt(fx, fy, 0)); d[k + 1] += w * (e1 - lowAt(fx, fy, 1)); d[k + 2] += w * (e2 - lowAt(fx, fy, 2));
+        }
+      }
+      ctx.putImageData(id, c0, 0);
+    };
+    side(0, x0, x0, (x) => (x0 - x) / x0);                 // left strip, matched to the photo's left edge
+    side(x1, W, x1 - m, (x) => (x - x1 + 1) / (W - x1));     // right strip, matched to the photo's right edge
+  }
+
   // Paints the strips of `canvas` (photo already drawn at `box`) with AI.
   async function aiFillCanvas(canvas, box, onStep, stepNet = STEP_NET) {
     const { dx, dy, dw, dh } = box;
-    if (dx > 0) return growSides(canvas, dx, dx + dw, stepNet, onStep);
+    if (dx > 0) {
+      const ok = await growSides(canvas, dx, dx + dw, stepNet, onStep);
+      if (ok) driftFix(canvas, dx, dx + dw);
+      return ok;
+    }
     if (dy > 0) {
       // strips above and below: turn the picture sideways, grow its sides, turn it back
       const r = rot90(canvas, false);
       const H = canvas.height;
       const ok = await growSides(r, H - (dy + dh), H - dy, stepNet, onStep);
       if (!ok) return false;
+      driftFix(r, H - (dy + dh), H - dy);
       const b = rot90(r, true), ctx = canvas.getContext("2d");
       ctx.globalCompositeOperation = "copy"; ctx.drawImage(b, 0, 0); ctx.globalCompositeOperation = "source-over";
     }
