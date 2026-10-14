@@ -1170,7 +1170,7 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
   }
 
   // Paints one strip in sections. `canvas` holds the photo at `box`; `side` is left/right/top/bottom.
-  async function hdStrip(canvas, box, side, onPhase, tileInfo) {
+  async function hdStrip(canvas, box, side, onPhase, tileInfo, feathers) {
     const { dx, dy, dw, dh } = box, W = canvas.width, H = canvas.height;
     const vert = side === "left" || side === "right";          // strip runs top-to-bottom
     const S = side === "left" ? dx : side === "right" ? W - dx - dw : side === "top" ? dy : H - dy - dh;
@@ -1232,6 +1232,22 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
         for (let c = 0; c < 3; c++) d[q + c] += w * ((real[j0 * 4 + c] - gen[j0 * 4 + c]) * (1 - a) + (real[j1 * 4 + c] - gen[j1 * 4 + c]) * a);
       }
       sctx.putImageData(id, 0, 0);
+      // the AI's own version of a thin band of the photo edge: it connects seamlessly to the new strip,
+      // and is later faded into the real photo so there's no hard line where the photo ends
+      const bC = Math.max(8, Math.round(across * 0.035)), bIn = Math.max(2, Math.round(bC * k));
+      let fx, fy, fw, fh;
+      if (side === "left") { fx = mx; fy = my; fw = bIn; fh = uc.height; }
+      else if (side === "right") { fx = mx + uc.width - bIn; fy = my; fw = bIn; fh = uc.height; }
+      else if (side === "top") { fx = mx; fy = my; fw = uc.width; fh = bIn; }
+      else { fx = mx; fy = my + uc.height - bIn; fw = uc.width; fh = bIn; }
+      const fc = mkCanvas(fw, fh), fctx = fc.getContext("2d", { willReadFrequently: true });
+      fctx.drawImage(bmp, fx * sx, fy * sy, fw * sx, fh * sy, 0, 0, fw, fh);
+      const fid = fctx.getImageData(0, 0, fw, fh), fd = fid.data;
+      for (let y = 0; y < fh; y++) for (let x = 0; x < fw; x++) {
+        const tt = vert ? y / fh : x / fw, fi = Math.min(N - 1, Math.max(0, tt * N - 0.5)), j0 = Math.floor(fi), j1 = Math.min(N - 1, j0 + 1), a = fi - j0, q = (y * fw + x) * 4;
+        for (let c = 0; c < 3; c++) fd[q + c] += (real[j0 * 4 + c] - gen[j0 * 4 + c]) * (1 - a) + (real[j1 * 4 + c] - gen[j1 * 4 + c]) * a;
+      }
+      fctx.putImageData(fid, 0, 0);
       if (bmp.close) bmp.close();
       // place it, fading in over the previous section
       let dx0, dy0, dW, dH;
@@ -1239,16 +1255,73 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
       else if (side === "right") { dx0 = dx + dw; dy0 = a0; dW = S; dH = T; }
       else if (side === "top") { dx0 = a0; dy0 = 0; dW = T; dH = S; }
       else { dx0 = a0; dy0 = dy + dh; dW = T; dH = S; }
-      const tmp = mkCanvas(dW, dH), tc = tmp.getContext("2d"); tc.imageSmoothingQuality = "high";
+      const tmp = mkCanvas(dW, dH), tc = tmp.getContext("2d", { willReadFrequently: true }); tc.imageSmoothingQuality = "high";
       tc.drawImage(sc, 0, 0, dW, dH);
+      // where this section overlaps the previous one, find the line along which they look most alike
+      // and join them there with a short blend (like stitching a panorama), instead of a long ghosted fade
       const ovl = prevEnd === null ? 0 : prevEnd - a0;
+      const rowA = new Float32Array(T).fill(1);
       if (ovl > 0) {
-        const g = vert ? tc.createLinearGradient(0, 0, 0, ovl) : tc.createLinearGradient(0, 0, ovl, 0);
-        g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,1)");
-        tc.globalCompositeOperation = "destination-in"; tc.fillStyle = g; tc.fillRect(0, 0, dW, dH);
+        const oldD = ctx.getImageData(dx0, dy0, vert ? dW : ovl, vert ? ovl : dH).data, newD = tc.getImageData(0, 0, vert ? dW : ovl, vert ? ovl : dH).data;
+        const span = vert ? dW : dH, diff = new Float32Array(ovl);
+        for (let r = 0; r < ovl; r++) {
+          let acc = 0;
+          for (let u = 0; u < span; u += 2) {
+            const q = (vert ? r * dW + u : u * ovl + r) * 4;
+            acc += Math.abs(oldD[q] - newD[q]) + Math.abs(oldD[q + 1] - newD[q + 1]) + Math.abs(oldD[q + 2] - newD[q + 2]);
+          }
+          diff[r] = acc;
+        }
+        const b = Math.max(8, Math.min(40, Math.floor(ovl / 6)));
+        let best = Math.floor(ovl / 2), bestV = Infinity;
+        for (let r = b; r < ovl - b; r++) {
+          let v = 0; for (let j = -6; j <= 6; j++) v += diff[Math.min(ovl - 1, Math.max(0, r + j))];
+          if (v < bestV) { bestV = v; best = r; }
+        }
+        for (let r = 0; r < T; r++) rowA[r] = r < best - b ? 0 : r > best + b ? 1 : (r - (best - b)) / (2 * b);
       }
+      const applyProf = (cv) => {
+        if (ovl <= 0) return;
+        const x = cv.getContext("2d", { willReadFrequently: true }), id2 = x.getImageData(0, 0, cv.width, cv.height), dd = id2.data;
+        for (let y = 0; y < cv.height; y++) for (let xx = 0; xx < cv.width; xx++) {
+          const r = Math.min(T - 1, Math.floor((vert ? y : xx) * T / (vert ? cv.height : cv.width)));
+          dd[(y * cv.width + xx) * 4 + 3] *= rowA[r];
+        }
+        x.putImageData(id2, 0, 0);
+      };
+      applyProf(tmp);
       ctx.drawImage(tmp, dx0, dy0);
+      // edge-blend piece for this section: full strength at the photo's border, fading to nothing inside
+      let ex, ey, eW, eH;
+      if (side === "left") { ex = dx; ey = a0; eW = bC; eH = T; }
+      else if (side === "right") { ex = dx + dw - bC; ey = a0; eW = bC; eH = T; }
+      else if (side === "top") { ex = a0; ey = dy; eW = T; eH = bC; }
+      else { ex = a0; ey = dy + dh - bC; eW = T; eH = bC; }
+      const ep = mkCanvas(eW, eH), epx = ep.getContext("2d", { willReadFrequently: true }); epx.imageSmoothingQuality = "high";
+      epx.drawImage(fc, 0, 0, eW, eH);
+      const g = side === "left" ? epx.createLinearGradient(0, 0, eW, 0) : side === "right" ? epx.createLinearGradient(eW, 0, 0, 0) : side === "top" ? epx.createLinearGradient(0, 0, 0, eH) : epx.createLinearGradient(0, eH, 0, 0);
+      g.addColorStop(0, "rgba(0,0,0,1)"); g.addColorStop(1, "rgba(0,0,0,0)");
+      epx.globalCompositeOperation = "destination-in"; epx.fillStyle = g; epx.fillRect(0, 0, eW, eH);
+      applyProf(ep);
+      feathers.push([ep, ex, ey]);
       prevEnd = a0 + T;
+    }
+  }
+
+  // Fades the photo's outermost band into the AI's version of that band, so the new strip continues the
+  // photo with no visible line. Only a thin band at the very edge changes; the rest of the photo is untouched.
+  function featherEdges(canvas, ai, box) {
+    const { dx, dy, dw, dh } = box, ctx = canvas.getContext("2d");
+    const bands = [];
+    if (dx > 0) { const b = Math.max(8, Math.round(dw * 0.035)); bands.push(["left", dx, dy, b, dh], ["right", dx + dw - b, dy, b, dh]); }
+    if (dy > 0) { const b = Math.max(8, Math.round(dh * 0.035)); bands.push(["top", dx, dy, dw, b], ["bottom", dx, dy + dh - b, dw, b]); }
+    for (const [side, x, y, w, h] of bands) {
+      const pc = mkCanvas(w, h), px = pc.getContext("2d");
+      px.drawImage(ai, x, y, w, h, 0, 0, w, h);
+      const g = side === "left" ? px.createLinearGradient(0, 0, w, 0) : side === "right" ? px.createLinearGradient(w, 0, 0, 0) : side === "top" ? px.createLinearGradient(0, 0, 0, h) : px.createLinearGradient(0, h, 0, 0);
+      g.addColorStop(0, "rgba(0,0,0,1)"); g.addColorStop(1, "rgba(0,0,0,0)");
+      px.globalCompositeOperation = "destination-in"; px.fillStyle = g; px.fillRect(0, 0, w, h);
+      ctx.drawImage(pc, x, y);
     }
   }
 
@@ -1351,16 +1424,19 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
           const up = p.W / bmp.width;
           if (bmp.close) bmp.close();
           seamMatch(c, it.src, it.w, it.h, box);
-          render2(c, it.src, it.w, it.h, box);
+          const ai = mkCanvas(p.W, p.H); ai.getContext("2d").drawImage(c, 0, 0);   // the AI's whole picture
+          render2(c, it.src, it.w, it.h, box);                                       // the real photo goes back on top
+          featherEdges(c, ai, box);                                                   // blend its border into the AI picture
           matchTexture(c, box, up);
         } else {
-          const { n, T } = hdTiles(len), tileInfo = { k: 0, n: 2 * n };
+          const { n, T } = hdTiles(len), tileInfo = { k: 0, n: 2 * n }, feathers = [];
           const phase = (key, v, ti) => onStep(0, 0, "hd_section", { s: ti.k, m: ti.n, msg: t(key, v) });
-          for (const side of (box.dx > 0 ? ["left", "right"] : ["top", "bottom"])) await hdStrip(c, box, side, phase, tileInfo);
-          render2(c, it.src, it.w, it.h, box);
+          for (const side of (box.dx > 0 ? ["left", "right"] : ["top", "bottom"])) await hdStrip(c, box, side, phase, tileInfo, feathers);
+          render2(c, it.src, it.w, it.h, box);                                       // the real photo goes back on top
+          const ctx = c.getContext("2d");
+          for (const [ep, ex, ey] of feathers) ctx.drawImage(ep, ex, ey);           // blend its border into the AI strips
           matchTexture(c, box, T / Math.min(1536, Math.max(720, r8(T * Math.min(1, 1536 / T)))));
         }
-        render2(c, it.src, it.w, it.h, box); // the real photo goes back on top, pixel-exact
         painted = true; hdUsed = true;
       } catch (e) {
         if (cancelReq) return null;
