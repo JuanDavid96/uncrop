@@ -66,7 +66,7 @@ Phones can only install the app from an `https://` address. Pick one:
 
 ## Updating the app
 
-After changing any file, open `sw.js` and raise the version number in `uncrop-v17` by one, then upload again. Installed copies update the next time they're opened.
+After changing any file, open `sw.js` and raise the version number in `uncrop-v18` by one, then upload again. Installed copies update the next time they're opened.
 
 ## Putting it in the App Store / Google Play (optional)
 

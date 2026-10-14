@@ -203,8 +203,10 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
           <span class="on" id="hdOn" data-i18n="hd_connected" hidden></span>
           <div class="acts">
             <button class="big" id="hdConnect" data-i18n="hd_connect"></button>
+            <button class="ghost" id="hdTest" data-i18n="hd_test" hidden></button>
             <button class="ghost" id="hdDisconnect" data-i18n="hd_disconnect" hidden></button>
           </div>
+          <p id="hdTestOut" hidden style="font-size:13.5px;word-break:break-word"></p>
         </div>
       </div>
 
@@ -295,6 +297,7 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
   const LANGS = [["en", "English"], ["es", "Español"], ["pt", "Português"], ["fr", "Français"], ["de", "Deutsch"], ["it", "Italiano"]];
   const I18N = {
     en: {
+      hd_test: "Test connection", hd_testing: "Testing…", hd_test_ok: "Works: your phone can reach the online AI and your account is accepted.", hd_test_fail: "Your phone couldn't use the online AI. Send this to Claude:",
       hd_section: "Section {s} of {m}: {msg}",
       hd_quota_plain: "Today's free online AI time is used up, so a plain strip was used. It resets 24 hours after your first use today.", hd_failed_plain: "The online AI couldn't be reached, so a plain strip was used.",
       hd_title: "Realistic AI fill (free)", hd_body: "Connect a free Hugging Face account to use a large online AI that paints sharp, realistic edges. Free accounts get about 5 minutes of AI time a day, roughly 5 to 25 photos depending on their size. Your photo is sent to Hugging Face to be processed.", hd_connect: "Connect free account", hd_connected: "Realistic online AI is on", hd_disconnect: "Disconnect", hd_step1: "Create a free account and confirm your email:", hd_step2: "Create a token: choose “Read”, give it any name, tap Create, then copy it:", hd_step3: "Paste the token below and tap Save.", hd_token_ph: "Paste your token (starts with hf_)", hd_save: "Save", hd_bad_token: "That doesn't look like a Hugging Face token. It starts with hf_.", hd_checking: "Checking your account…", hd_rejected: "Hugging Face didn't accept that token. Copy it again and paste it here.", hd_uploading: "Sending the photo to the online AI…", hd_waiting: "Waiting for the online AI…", hd_painting: "Online AI is painting the edges ({k} of {n})…", hd_quota: "Today's free online AI time is used up, so the phone AI was used. It resets 24 hours after your first use today.", hd_failed: "The online AI couldn't be reached, so the phone AI was used.",
@@ -335,6 +338,7 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
       ios_title: "Add Uncrop to your Home Screen", ios1: "Tap the Share button in Safari.", ios2: "Tap “Add to Home Screen”.", ios3: "Tap “Add”. Uncrop now opens like any other app and works offline.", got_it: "Got it"
     },
     es: {
+      hd_test: "Probar conexión", hd_testing: "Probando…", hd_test_ok: "Funciona: tu teléfono llega a la IA en línea y tu cuenta es aceptada.", hd_test_fail: "Tu teléfono no pudo usar la IA en línea. Envíale esto a Claude:",
       hd_section: "Parte {s} de {m}: {msg}",
       hd_quota_plain: "Ya se usó el tiempo gratis de IA en línea de hoy, así que se usó una franja lisa. Se renueva 24 horas después de tu primer uso de hoy.", hd_failed_plain: "No se pudo conectar con la IA en línea, así que se usó una franja lisa.",
       hd_title: "Relleno IA realista (gratis)", hd_body: "Conecta una cuenta gratuita de Hugging Face para usar una IA en línea grande que pinta bordes nítidos y realistas. Las cuentas gratis tienen unos 5 minutos de IA al día, entre 5 y 25 fotos según su tamaño. Tu foto se envía a Hugging Face para procesarla.", hd_connect: "Conectar cuenta gratis", hd_connected: "La IA realista en línea está activada", hd_disconnect: "Desconectar", hd_step1: "Crea una cuenta gratis y confirma tu correo:", hd_step2: "Crea un token: elige «Read», ponle cualquier nombre, toca Create y cópialo:", hd_step3: "Pega el token abajo y toca Guardar.", hd_token_ph: "Pega tu token (empieza por hf_)", hd_save: "Guardar", hd_bad_token: "Eso no parece un token de Hugging Face. Empieza por hf_.", hd_checking: "Comprobando tu cuenta…", hd_rejected: "Hugging Face no aceptó ese token. Cópialo de nuevo y pégalo aquí.", hd_uploading: "Enviando la foto a la IA en línea…", hd_waiting: "Esperando a la IA en línea…", hd_painting: "La IA en línea está pintando los bordes ({k} de {n})…", hd_quota: "Ya se usó el tiempo gratis de IA en línea de hoy, así que se usó la IA del teléfono. Se renueva 24 horas después de tu primer uso de hoy.", hd_failed: "No se pudo conectar con la IA en línea, así que se usó la IA del teléfono.",
@@ -375,6 +379,7 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
       ios_title: "Añade Uncrop a tu pantalla de inicio", ios1: "Toca el botón Compartir en Safari.", ios2: "Toca «Agregar a inicio».", ios3: "Toca «Agregar». Uncrop se abrirá como cualquier app y funcionará sin conexión.", got_it: "Entendido"
     },
     pt: {
+      hd_test: "Testar conexão", hd_testing: "Testando…", hd_test_ok: "Funciona: seu celular acessa a IA online e sua conta foi aceita.", hd_test_fail: "Seu celular não conseguiu usar a IA online. Envie isto ao Claude:",
       hd_section: "Parte {s} de {m}: {msg}",
       hd_quota_plain: "O tempo grátis de IA online de hoje acabou, então foi usada uma faixa lisa. Renova 24 horas após seu primeiro uso de hoje.", hd_failed_plain: "Não foi possível acessar a IA online, então foi usada uma faixa lisa.",
       hd_title: "Preenchimento IA realista (grátis)", hd_body: "Conecte uma conta gratuita do Hugging Face para usar uma IA online grande que pinta bordas nítidas e realistas. Contas grátis têm cerca de 5 minutos de IA por dia, entre 5 e 25 fotos, conforme o tamanho. Sua foto é enviada ao Hugging Face para ser processada.", hd_connect: "Conectar conta grátis", hd_connected: "A IA realista online está ativada", hd_disconnect: "Desconectar", hd_step1: "Crie uma conta grátis e confirme seu e-mail:", hd_step2: "Crie um token: escolha “Read”, dê qualquer nome, toque em Create e copie:", hd_step3: "Cole o token abaixo e toque em Salvar.", hd_token_ph: "Cole seu token (começa com hf_)", hd_save: "Salvar", hd_bad_token: "Isso não parece um token do Hugging Face. Ele começa com hf_.", hd_checking: "Verificando sua conta…", hd_rejected: "O Hugging Face não aceitou esse token. Copie de novo e cole aqui.", hd_uploading: "Enviando a foto para a IA online…", hd_waiting: "Aguardando a IA online…", hd_painting: "A IA online está pintando as bordas ({k} de {n})…", hd_quota: "O tempo grátis de IA online de hoje acabou, então foi usada a IA do celular. Renova 24 horas após seu primeiro uso de hoje.", hd_failed: "Não foi possível acessar a IA online, então foi usada a IA do celular.",
@@ -415,6 +420,7 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
       ios_title: "Adicione o Uncrop à Tela de Início", ios1: "Toque no botão Compartilhar no Safari.", ios2: "Toque em “Adicionar à Tela de Início”.", ios3: "Toque em “Adicionar”. O Uncrop abre como qualquer app e funciona offline.", got_it: "Entendi"
     },
     fr: {
+      hd_test: "Tester la connexion", hd_testing: "Test en cours…", hd_test_ok: "Ça marche : votre téléphone atteint l'IA en ligne et votre compte est accepté.", hd_test_fail: "Votre téléphone n'a pas pu utiliser l'IA en ligne. Envoyez ceci à Claude :",
       hd_section: "Partie {s} sur {m} : {msg}",
       hd_quota_plain: "Le temps d'IA en ligne gratuit du jour est épuisé, une bande unie a donc été utilisée. Il se renouvelle 24 heures après votre première utilisation du jour.", hd_failed_plain: "L'IA en ligne n'a pas pu être contactée, une bande unie a donc été utilisée.",
       hd_title: "Remplissage IA réaliste (gratuit)", hd_body: "Connectez un compte Hugging Face gratuit pour utiliser une grande IA en ligne qui peint des bords nets et réalistes. Les comptes gratuits ont environ 5 minutes d'IA par jour, soit 5 à 25 photos selon leur taille. Votre photo est envoyée à Hugging Face pour être traitée.", hd_connect: "Connecter un compte gratuit", hd_connected: "L'IA réaliste en ligne est activée", hd_disconnect: "Déconnecter", hd_step1: "Créez un compte gratuit et confirmez votre e-mail :", hd_step2: "Créez un jeton : choisissez « Read », donnez-lui un nom, touchez Create, puis copiez-le :", hd_step3: "Collez le jeton ci-dessous et touchez Enregistrer.", hd_token_ph: "Collez votre jeton (commence par hf_)", hd_save: "Enregistrer", hd_bad_token: "Ce n'est pas un jeton Hugging Face. Il commence par hf_.", hd_checking: "Vérification de votre compte…", hd_rejected: "Hugging Face n'a pas accepté ce jeton. Copiez-le de nouveau et collez-le ici.", hd_uploading: "Envoi de la photo à l'IA en ligne…", hd_waiting: "En attente de l'IA en ligne…", hd_painting: "L'IA en ligne peint les bords ({k} sur {n})…", hd_quota: "Le temps d'IA en ligne gratuit du jour est épuisé, l'IA du téléphone a donc été utilisée. Il se renouvelle 24 heures après votre première utilisation du jour.", hd_failed: "L'IA en ligne n'a pas pu être contactée, l'IA du téléphone a donc été utilisée.",
@@ -455,6 +461,7 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
       ios_title: "Ajouter Uncrop à l'écran d'accueil", ios1: "Touchez le bouton Partager dans Safari.", ios2: "Touchez « Sur l'écran d'accueil ».", ios3: "Touchez « Ajouter ». Uncrop s'ouvre alors comme une app et fonctionne hors ligne.", got_it: "Compris"
     },
     de: {
+      hd_test: "Verbindung testen", hd_testing: "Wird getestet…", hd_test_ok: "Funktioniert: dein Handy erreicht die Online-KI und dein Konto wird akzeptiert.", hd_test_fail: "Dein Handy konnte die Online-KI nicht nutzen. Schick das an Claude:",
       hd_section: "Abschnitt {s} von {m}: {msg}",
       hd_quota_plain: "Die kostenlose Online-KI-Zeit für heute ist aufgebraucht, daher wurde ein einfarbiger Streifen verwendet. Sie erneuert sich 24 Stunden nach deiner ersten Nutzung heute.", hd_failed_plain: "Die Online-KI war nicht erreichbar, daher wurde ein einfarbiger Streifen verwendet.",
       hd_title: "Realistische KI-Füllung (kostenlos)", hd_body: "Verbinde ein kostenloses Hugging-Face-Konto, um eine große Online-KI zu nutzen, die scharfe, realistische Ränder malt. Kostenlose Konten haben etwa 5 Minuten KI-Zeit pro Tag, je nach Größe rund 5 bis 25 Fotos. Dein Foto wird zur Verarbeitung an Hugging Face gesendet.", hd_connect: "Kostenloses Konto verbinden", hd_connected: "Realistische Online-KI ist aktiv", hd_disconnect: "Trennen", hd_step1: "Erstelle ein kostenloses Konto und bestätige deine E-Mail:", hd_step2: "Erstelle ein Token: wähle „Read“, gib einen beliebigen Namen ein, tippe auf Create und kopiere es:", hd_step3: "Füge das Token unten ein und tippe auf Speichern.", hd_token_ph: "Token einfügen (beginnt mit hf_)", hd_save: "Speichern", hd_bad_token: "Das sieht nicht wie ein Hugging-Face-Token aus. Es beginnt mit hf_.", hd_checking: "Konto wird geprüft…", hd_rejected: "Hugging Face hat dieses Token nicht akzeptiert. Kopiere es erneut und füge es hier ein.", hd_uploading: "Foto wird an die Online-KI gesendet…", hd_waiting: "Warte auf die Online-KI…", hd_painting: "Die Online-KI malt die Ränder ({k} von {n})…", hd_quota: "Die kostenlose Online-KI-Zeit für heute ist aufgebraucht, daher wurde die Handy-KI verwendet. Sie erneuert sich 24 Stunden nach deiner ersten Nutzung heute.", hd_failed: "Die Online-KI war nicht erreichbar, daher wurde die Handy-KI verwendet.",
@@ -495,6 +502,7 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
       ios_title: "Uncrop zum Home-Bildschirm hinzufügen", ios1: "Tippe in Safari auf den Teilen-Button.", ios2: "Tippe auf „Zum Home-Bildschirm“.", ios3: "Tippe auf „Hinzufügen“. Uncrop öffnet sich dann wie jede App und funktioniert offline.", got_it: "Verstanden"
     },
     it: {
+      hd_test: "Prova connessione", hd_testing: "Prova in corso…", hd_test_ok: "Funziona: il telefono raggiunge l'IA online e il tuo account è accettato.", hd_test_fail: "Il telefono non è riuscito a usare l'IA online. Invia questo a Claude:",
       hd_section: "Parte {s} di {m}: {msg}",
       hd_quota_plain: "Il tempo gratuito di IA online di oggi è finito, quindi è stata usata una striscia semplice. Si rinnova 24 ore dopo il tuo primo utilizzo di oggi.", hd_failed_plain: "Non è stato possibile raggiungere l'IA online, quindi è stata usata una striscia semplice.",
       hd_title: "Riempimento IA realistico (gratis)", hd_body: "Collega un account Hugging Face gratuito per usare una grande IA online che dipinge bordi nitidi e realistici. Gli account gratuiti hanno circa 5 minuti di IA al giorno, circa 5–25 foto a seconda delle dimensioni. La tua foto viene inviata a Hugging Face per l'elaborazione.", hd_connect: "Collega account gratuito", hd_connected: "L'IA realistica online è attiva", hd_disconnect: "Scollega", hd_step1: "Crea un account gratuito e conferma la tua email:", hd_step2: "Crea un token: scegli «Read», dagli un nome qualsiasi, tocca Create e copialo:", hd_step3: "Incolla il token qui sotto e tocca Salva.", hd_token_ph: "Incolla il tuo token (inizia con hf_)", hd_save: "Salva", hd_bad_token: "Non sembra un token Hugging Face. Inizia con hf_.", hd_checking: "Verifica dell'account…", hd_rejected: "Hugging Face non ha accettato quel token. Copialo di nuovo e incollalo qui.", hd_uploading: "Invio della foto all'IA online…", hd_waiting: "In attesa dell'IA online…", hd_painting: "L'IA online sta dipingendo i bordi ({k} di {n})…", hd_quota: "Il tempo gratuito di IA online di oggi è finito, quindi è stata usata l'IA del telefono. Si rinnova 24 ore dopo il tuo primo utilizzo di oggi.", hd_failed: "Non è stato possibile raggiungere l'IA online, quindi è stata usata l'IA del telefono.",
@@ -1025,7 +1033,8 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
   function refreshHdCard() {
     const ai = opt("bg") === "ai" && !IN_CLAUDE;
     $("hdCard").hidden = !ai;
-    $("hdOn").hidden = !hdToken; $("hdDisconnect").hidden = !hdToken;
+    $("hdOn").hidden = !hdToken; $("hdDisconnect").hidden = !hdToken; $("hdTest").hidden = !hdToken;
+    if (!hdToken) $("hdTestOut").hidden = true;
     $("hdConnect").hidden = !!hdToken; $("hdBody").hidden = !!hdToken;
   }
   function openHdSheet() {
@@ -1044,6 +1053,25 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
     $("hdSave").disabled = false;
     hdToken = v; store.set(HD_KEY, v); hdBlocked = false;
     $("hdSheet").hidden = true; refreshHdCard(); invalidate();
+  }
+
+  // Checks the same path a real conversion uses (cross-site request with the token, then the upload step)
+  // without starting the AI, so it costs none of the free daily time.
+  async function testHd() {
+    const out = $("hdTestOut"); out.hidden = false; out.style.color = "var(--muted)"; out.textContent = t("hd_testing");
+    const auth = { Authorization: "Bearer " + hdToken }, steps = [];
+    try {
+      let r = await fetch(HD_ROOT + "/gradio_api/info", { headers: auth });
+      steps.push("info " + r.status); if (!r.ok) throw new Error("info " + r.status);
+      const c = mkCanvas(8, 8), b = await toJpeg(c), fd = new FormData(); fd.append("files", b, "test.jpg");
+      r = await fetch(HD_ROOT + "/gradio_api/upload", { method: "POST", headers: auth, body: fd });
+      steps.push("upload " + r.status); if (!r.ok) throw new Error("upload " + r.status + " " + (await r.text()).slice(0, 100));
+      r = await fetch("https://huggingface.co/api/whoami-v2", { headers: auth });
+      steps.push("account " + r.status); if (r.status === 401) throw new Error("token rejected");
+      out.style.color = "var(--ok)"; out.textContent = t("hd_test_ok");
+    } catch (e) {
+      out.style.color = "var(--warn)"; out.textContent = `${t("hd_test_fail")} [${steps.join(", ")}${steps.length ? " · " : ""}${errText(e)} · ${navigator.userAgent.match(/(iPhone OS|Android) [\d_.]+/)?.[0] || "?"}]`;
+    }
   }
 
   // Output size the online AI works at: same shape as our canvas, longest side 1536, sides multiples of 8, at least 720.
@@ -1571,6 +1599,7 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
   document.querySelectorAll('input[name="bg"],input[name="res"],input[name="fmt"]').forEach(i => i.addEventListener("change", () => { updateAutoHint(); invalidate(); }));
   if (IN_CLAUDE) { $("bg-ai").disabled = true; $("aiNote").hidden = false; } else $("bg-ai").checked = true; // AI fill is the default in the installed app
   $("hdConnect").addEventListener("click", openHdSheet);
+  $("hdTest").addEventListener("click", testHd);
   $("hdCancel").addEventListener("click", () => { $("hdSheet").hidden = true; });
   $("hdSave").addEventListener("click", saveHdToken);
   $("hdToken").addEventListener("keydown", (e) => { if (e.key === "Enter") saveHdToken(); });
