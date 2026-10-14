@@ -1,7 +1,7 @@
 // Uncrop service worker: caches the app so it opens instantly and works offline.
 // Bump VERSION whenever you change any file, so phones pick up the update.
 // The downloaded AI model lives in its own cache ("uncrop-models") and is kept across updates.
-const VERSION = "uncrop-v16";
+const VERSION = "uncrop-v17";
 const SHELL = [
   "./",
   "./index.html",

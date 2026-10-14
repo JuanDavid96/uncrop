@@ -295,8 +295,9 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
   const LANGS = [["en", "English"], ["es", "Español"], ["pt", "Português"], ["fr", "Français"], ["de", "Deutsch"], ["it", "Italiano"]];
   const I18N = {
     en: {
+      hd_section: "Section {s} of {m}: {msg}",
       hd_quota_plain: "Today's free online AI time is used up, so a plain strip was used. It resets 24 hours after your first use today.", hd_failed_plain: "The online AI couldn't be reached, so a plain strip was used.",
-      hd_title: "Realistic AI fill (free)", hd_body: "Connect a free Hugging Face account to use a large online AI that paints sharp, realistic edges. Free accounts get about 5 minutes of AI time a day, roughly 15 to 30 photos. Your photo is sent to Hugging Face to be processed.", hd_connect: "Connect free account", hd_connected: "Realistic online AI is on", hd_disconnect: "Disconnect", hd_step1: "Create a free account and confirm your email:", hd_step2: "Create a token: choose “Read”, give it any name, tap Create, then copy it:", hd_step3: "Paste the token below and tap Save.", hd_token_ph: "Paste your token (starts with hf_)", hd_save: "Save", hd_bad_token: "That doesn't look like a Hugging Face token. It starts with hf_.", hd_checking: "Checking your account…", hd_rejected: "Hugging Face didn't accept that token. Copy it again and paste it here.", hd_uploading: "Sending the photo to the online AI…", hd_waiting: "Waiting for the online AI…", hd_painting: "Online AI is painting the edges ({k} of {n})…", hd_quota: "Today's free online AI time is used up, so the phone AI was used. It resets 24 hours after your first use today.", hd_failed: "The online AI couldn't be reached, so the phone AI was used.",
+      hd_title: "Realistic AI fill (free)", hd_body: "Connect a free Hugging Face account to use a large online AI that paints sharp, realistic edges. Free accounts get about 5 minutes of AI time a day, roughly 5 to 25 photos depending on their size. Your photo is sent to Hugging Face to be processed.", hd_connect: "Connect free account", hd_connected: "Realistic online AI is on", hd_disconnect: "Disconnect", hd_step1: "Create a free account and confirm your email:", hd_step2: "Create a token: choose “Read”, give it any name, tap Create, then copy it:", hd_step3: "Paste the token below and tap Save.", hd_token_ph: "Paste your token (starts with hf_)", hd_save: "Save", hd_bad_token: "That doesn't look like a Hugging Face token. It starts with hf_.", hd_checking: "Checking your account…", hd_rejected: "Hugging Face didn't accept that token. Copy it again and paste it here.", hd_uploading: "Sending the photo to the online AI…", hd_waiting: "Waiting for the online AI…", hd_painting: "Online AI is painting the edges ({k} of {n})…", hd_quota: "Today's free online AI time is used up, so the phone AI was used. It resets 24 hours after your first use today.", hd_failed: "The online AI couldn't be reached, so the phone AI was used.",
       ai: "AI fill", ai_hint: "AI fill: paints what the rest of the scene would look like. Runs on your phone, free.", ai_unavailable: "AI fill works in the installed app, not in this preview.", ai_dl_title: "Download the AI once", ai_dl_body: "AI fill needs a one-time download of about 90 MB. Use Wi-Fi. After that it works offline. Each photo takes about a minute.", ai_dl_ok: "Download", not_now: "Not now", ai_downloading: "Downloading the AI… {p}%", ai_loading: "Starting the AI…", ai_filling: "AI is painting the edges ({k} of {n}). About 15 seconds each…", ai_video: "AI is preparing the video edges ({k} of {n})…", ai_failed: "The AI couldn't run on this phone, so a plain strip was used.", ai_declined: "Pick another strip color, or download the AI to use AI fill.",
       install: "Install", language: "Language",
       h1: "Post the whole photo. Nothing cut off.",
@@ -334,8 +335,9 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
       ios_title: "Add Uncrop to your Home Screen", ios1: "Tap the Share button in Safari.", ios2: "Tap “Add to Home Screen”.", ios3: "Tap “Add”. Uncrop now opens like any other app and works offline.", got_it: "Got it"
     },
     es: {
+      hd_section: "Parte {s} de {m}: {msg}",
       hd_quota_plain: "Ya se usó el tiempo gratis de IA en línea de hoy, así que se usó una franja lisa. Se renueva 24 horas después de tu primer uso de hoy.", hd_failed_plain: "No se pudo conectar con la IA en línea, así que se usó una franja lisa.",
-      hd_title: "Relleno IA realista (gratis)", hd_body: "Conecta una cuenta gratuita de Hugging Face para usar una IA en línea grande que pinta bordes nítidos y realistas. Las cuentas gratis tienen unos 5 minutos de IA al día, entre 15 y 30 fotos. Tu foto se envía a Hugging Face para procesarla.", hd_connect: "Conectar cuenta gratis", hd_connected: "La IA realista en línea está activada", hd_disconnect: "Desconectar", hd_step1: "Crea una cuenta gratis y confirma tu correo:", hd_step2: "Crea un token: elige «Read», ponle cualquier nombre, toca Create y cópialo:", hd_step3: "Pega el token abajo y toca Guardar.", hd_token_ph: "Pega tu token (empieza por hf_)", hd_save: "Guardar", hd_bad_token: "Eso no parece un token de Hugging Face. Empieza por hf_.", hd_checking: "Comprobando tu cuenta…", hd_rejected: "Hugging Face no aceptó ese token. Cópialo de nuevo y pégalo aquí.", hd_uploading: "Enviando la foto a la IA en línea…", hd_waiting: "Esperando a la IA en línea…", hd_painting: "La IA en línea está pintando los bordes ({k} de {n})…", hd_quota: "Ya se usó el tiempo gratis de IA en línea de hoy, así que se usó la IA del teléfono. Se renueva 24 horas después de tu primer uso de hoy.", hd_failed: "No se pudo conectar con la IA en línea, así que se usó la IA del teléfono.",
+      hd_title: "Relleno IA realista (gratis)", hd_body: "Conecta una cuenta gratuita de Hugging Face para usar una IA en línea grande que pinta bordes nítidos y realistas. Las cuentas gratis tienen unos 5 minutos de IA al día, entre 5 y 25 fotos según su tamaño. Tu foto se envía a Hugging Face para procesarla.", hd_connect: "Conectar cuenta gratis", hd_connected: "La IA realista en línea está activada", hd_disconnect: "Desconectar", hd_step1: "Crea una cuenta gratis y confirma tu correo:", hd_step2: "Crea un token: elige «Read», ponle cualquier nombre, toca Create y cópialo:", hd_step3: "Pega el token abajo y toca Guardar.", hd_token_ph: "Pega tu token (empieza por hf_)", hd_save: "Guardar", hd_bad_token: "Eso no parece un token de Hugging Face. Empieza por hf_.", hd_checking: "Comprobando tu cuenta…", hd_rejected: "Hugging Face no aceptó ese token. Cópialo de nuevo y pégalo aquí.", hd_uploading: "Enviando la foto a la IA en línea…", hd_waiting: "Esperando a la IA en línea…", hd_painting: "La IA en línea está pintando los bordes ({k} de {n})…", hd_quota: "Ya se usó el tiempo gratis de IA en línea de hoy, así que se usó la IA del teléfono. Se renueva 24 horas después de tu primer uso de hoy.", hd_failed: "No se pudo conectar con la IA en línea, así que se usó la IA del teléfono.",
       ai: "Relleno IA", ai_hint: "Relleno IA: pinta cómo seguiría la escena. Funciona en tu teléfono, gratis.", ai_unavailable: "El relleno IA funciona en la app instalada, no en esta vista previa.", ai_dl_title: "Descarga la IA una vez", ai_dl_body: "El relleno IA necesita una descarga única de unos 90 MB. Usa wifi. Después funciona sin conexión. Cada foto tarda alrededor de un minuto.", ai_dl_ok: "Descargar", not_now: "Ahora no", ai_downloading: "Descargando la IA… {p} %", ai_loading: "Iniciando la IA…", ai_filling: "La IA está pintando los bordes ({k} de {n}). Unos 15 segundos cada uno…", ai_video: "La IA está preparando los bordes del video ({k} de {n})…", ai_failed: "La IA no pudo funcionar en este teléfono, así que se usó una franja lisa.", ai_declined: "Elige otro color de franja o descarga la IA para usar el relleno IA.",
       install: "Instalar", language: "Idioma",
       h1: "Publica la foto completa. Sin recortes.",
@@ -373,8 +375,9 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
       ios_title: "Añade Uncrop a tu pantalla de inicio", ios1: "Toca el botón Compartir en Safari.", ios2: "Toca «Agregar a inicio».", ios3: "Toca «Agregar». Uncrop se abrirá como cualquier app y funcionará sin conexión.", got_it: "Entendido"
     },
     pt: {
+      hd_section: "Parte {s} de {m}: {msg}",
       hd_quota_plain: "O tempo grátis de IA online de hoje acabou, então foi usada uma faixa lisa. Renova 24 horas após seu primeiro uso de hoje.", hd_failed_plain: "Não foi possível acessar a IA online, então foi usada uma faixa lisa.",
-      hd_title: "Preenchimento IA realista (grátis)", hd_body: "Conecte uma conta gratuita do Hugging Face para usar uma IA online grande que pinta bordas nítidas e realistas. Contas grátis têm cerca de 5 minutos de IA por dia, entre 15 e 30 fotos. Sua foto é enviada ao Hugging Face para ser processada.", hd_connect: "Conectar conta grátis", hd_connected: "A IA realista online está ativada", hd_disconnect: "Desconectar", hd_step1: "Crie uma conta grátis e confirme seu e-mail:", hd_step2: "Crie um token: escolha “Read”, dê qualquer nome, toque em Create e copie:", hd_step3: "Cole o token abaixo e toque em Salvar.", hd_token_ph: "Cole seu token (começa com hf_)", hd_save: "Salvar", hd_bad_token: "Isso não parece um token do Hugging Face. Ele começa com hf_.", hd_checking: "Verificando sua conta…", hd_rejected: "O Hugging Face não aceitou esse token. Copie de novo e cole aqui.", hd_uploading: "Enviando a foto para a IA online…", hd_waiting: "Aguardando a IA online…", hd_painting: "A IA online está pintando as bordas ({k} de {n})…", hd_quota: "O tempo grátis de IA online de hoje acabou, então foi usada a IA do celular. Renova 24 horas após seu primeiro uso de hoje.", hd_failed: "Não foi possível acessar a IA online, então foi usada a IA do celular.",
+      hd_title: "Preenchimento IA realista (grátis)", hd_body: "Conecte uma conta gratuita do Hugging Face para usar uma IA online grande que pinta bordas nítidas e realistas. Contas grátis têm cerca de 5 minutos de IA por dia, entre 5 e 25 fotos, conforme o tamanho. Sua foto é enviada ao Hugging Face para ser processada.", hd_connect: "Conectar conta grátis", hd_connected: "A IA realista online está ativada", hd_disconnect: "Desconectar", hd_step1: "Crie uma conta grátis e confirme seu e-mail:", hd_step2: "Crie um token: escolha “Read”, dê qualquer nome, toque em Create e copie:", hd_step3: "Cole o token abaixo e toque em Salvar.", hd_token_ph: "Cole seu token (começa com hf_)", hd_save: "Salvar", hd_bad_token: "Isso não parece um token do Hugging Face. Ele começa com hf_.", hd_checking: "Verificando sua conta…", hd_rejected: "O Hugging Face não aceitou esse token. Copie de novo e cole aqui.", hd_uploading: "Enviando a foto para a IA online…", hd_waiting: "Aguardando a IA online…", hd_painting: "A IA online está pintando as bordas ({k} de {n})…", hd_quota: "O tempo grátis de IA online de hoje acabou, então foi usada a IA do celular. Renova 24 horas após seu primeiro uso de hoje.", hd_failed: "Não foi possível acessar a IA online, então foi usada a IA do celular.",
       ai: "Preenchimento IA", ai_hint: "Preenchimento IA: pinta como a cena continuaria. Funciona no seu celular, de graça.", ai_unavailable: "O preenchimento IA funciona no app instalado, não nesta pré-visualização.", ai_dl_title: "Baixe a IA uma vez", ai_dl_body: "O preenchimento IA precisa de um download único de cerca de 90 MB. Use o Wi-Fi. Depois funciona offline. Cada foto leva cerca de um minuto.", ai_dl_ok: "Baixar", not_now: "Agora não", ai_downloading: "Baixando a IA… {p}%", ai_loading: "Iniciando a IA…", ai_filling: "A IA está pintando as bordas ({k} de {n}). Cerca de 15 segundos cada…", ai_video: "A IA está preparando as bordas do vídeo ({k} de {n})…", ai_failed: "A IA não conseguiu rodar neste celular, então foi usada uma faixa lisa.", ai_declined: "Escolha outra cor de faixa ou baixe a IA para usar o preenchimento IA.",
       install: "Instalar", language: "Idioma",
       h1: "Poste a foto inteira. Sem cortes.",
@@ -412,8 +415,9 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
       ios_title: "Adicione o Uncrop à Tela de Início", ios1: "Toque no botão Compartilhar no Safari.", ios2: "Toque em “Adicionar à Tela de Início”.", ios3: "Toque em “Adicionar”. O Uncrop abre como qualquer app e funciona offline.", got_it: "Entendi"
     },
     fr: {
+      hd_section: "Partie {s} sur {m} : {msg}",
       hd_quota_plain: "Le temps d'IA en ligne gratuit du jour est épuisé, une bande unie a donc été utilisée. Il se renouvelle 24 heures après votre première utilisation du jour.", hd_failed_plain: "L'IA en ligne n'a pas pu être contactée, une bande unie a donc été utilisée.",
-      hd_title: "Remplissage IA réaliste (gratuit)", hd_body: "Connectez un compte Hugging Face gratuit pour utiliser une grande IA en ligne qui peint des bords nets et réalistes. Les comptes gratuits ont environ 5 minutes d'IA par jour, soit 15 à 30 photos. Votre photo est envoyée à Hugging Face pour être traitée.", hd_connect: "Connecter un compte gratuit", hd_connected: "L'IA réaliste en ligne est activée", hd_disconnect: "Déconnecter", hd_step1: "Créez un compte gratuit et confirmez votre e-mail :", hd_step2: "Créez un jeton : choisissez « Read », donnez-lui un nom, touchez Create, puis copiez-le :", hd_step3: "Collez le jeton ci-dessous et touchez Enregistrer.", hd_token_ph: "Collez votre jeton (commence par hf_)", hd_save: "Enregistrer", hd_bad_token: "Ce n'est pas un jeton Hugging Face. Il commence par hf_.", hd_checking: "Vérification de votre compte…", hd_rejected: "Hugging Face n'a pas accepté ce jeton. Copiez-le de nouveau et collez-le ici.", hd_uploading: "Envoi de la photo à l'IA en ligne…", hd_waiting: "En attente de l'IA en ligne…", hd_painting: "L'IA en ligne peint les bords ({k} sur {n})…", hd_quota: "Le temps d'IA en ligne gratuit du jour est épuisé, l'IA du téléphone a donc été utilisée. Il se renouvelle 24 heures après votre première utilisation du jour.", hd_failed: "L'IA en ligne n'a pas pu être contactée, l'IA du téléphone a donc été utilisée.",
+      hd_title: "Remplissage IA réaliste (gratuit)", hd_body: "Connectez un compte Hugging Face gratuit pour utiliser une grande IA en ligne qui peint des bords nets et réalistes. Les comptes gratuits ont environ 5 minutes d'IA par jour, soit 5 à 25 photos selon leur taille. Votre photo est envoyée à Hugging Face pour être traitée.", hd_connect: "Connecter un compte gratuit", hd_connected: "L'IA réaliste en ligne est activée", hd_disconnect: "Déconnecter", hd_step1: "Créez un compte gratuit et confirmez votre e-mail :", hd_step2: "Créez un jeton : choisissez « Read », donnez-lui un nom, touchez Create, puis copiez-le :", hd_step3: "Collez le jeton ci-dessous et touchez Enregistrer.", hd_token_ph: "Collez votre jeton (commence par hf_)", hd_save: "Enregistrer", hd_bad_token: "Ce n'est pas un jeton Hugging Face. Il commence par hf_.", hd_checking: "Vérification de votre compte…", hd_rejected: "Hugging Face n'a pas accepté ce jeton. Copiez-le de nouveau et collez-le ici.", hd_uploading: "Envoi de la photo à l'IA en ligne…", hd_waiting: "En attente de l'IA en ligne…", hd_painting: "L'IA en ligne peint les bords ({k} sur {n})…", hd_quota: "Le temps d'IA en ligne gratuit du jour est épuisé, l'IA du téléphone a donc été utilisée. Il se renouvelle 24 heures après votre première utilisation du jour.", hd_failed: "L'IA en ligne n'a pas pu être contactée, l'IA du téléphone a donc été utilisée.",
       ai: "Remplissage IA", ai_hint: "Remplissage IA : peint la suite de la scène. Fonctionne sur votre téléphone, gratuitement.", ai_unavailable: "Le remplissage IA fonctionne dans l'app installée, pas dans cet aperçu.", ai_dl_title: "Télécharger l'IA une fois", ai_dl_body: "Le remplissage IA nécessite un téléchargement unique d'environ 90 Mo. Utilisez le Wi-Fi. Ensuite, il fonctionne hors ligne. Chaque photo prend environ une minute.", ai_dl_ok: "Télécharger", not_now: "Pas maintenant", ai_downloading: "Téléchargement de l'IA… {p} %", ai_loading: "Démarrage de l'IA…", ai_filling: "L'IA peint les bords ({k} sur {n}). Environ 15 secondes chacun…", ai_video: "L'IA prépare les bords de la vidéo ({k} sur {n})…", ai_failed: "L'IA n'a pas pu fonctionner sur ce téléphone, une bande unie a donc été utilisée.", ai_declined: "Choisissez une autre couleur de bande ou téléchargez l'IA pour utiliser le remplissage IA.",
       install: "Installer", language: "Langue",
       h1: "Publiez la photo entière. Rien de coupé.",
@@ -451,8 +455,9 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
       ios_title: "Ajouter Uncrop à l'écran d'accueil", ios1: "Touchez le bouton Partager dans Safari.", ios2: "Touchez « Sur l'écran d'accueil ».", ios3: "Touchez « Ajouter ». Uncrop s'ouvre alors comme une app et fonctionne hors ligne.", got_it: "Compris"
     },
     de: {
+      hd_section: "Abschnitt {s} von {m}: {msg}",
       hd_quota_plain: "Die kostenlose Online-KI-Zeit für heute ist aufgebraucht, daher wurde ein einfarbiger Streifen verwendet. Sie erneuert sich 24 Stunden nach deiner ersten Nutzung heute.", hd_failed_plain: "Die Online-KI war nicht erreichbar, daher wurde ein einfarbiger Streifen verwendet.",
-      hd_title: "Realistische KI-Füllung (kostenlos)", hd_body: "Verbinde ein kostenloses Hugging-Face-Konto, um eine große Online-KI zu nutzen, die scharfe, realistische Ränder malt. Kostenlose Konten haben etwa 5 Minuten KI-Zeit pro Tag, rund 15 bis 30 Fotos. Dein Foto wird zur Verarbeitung an Hugging Face gesendet.", hd_connect: "Kostenloses Konto verbinden", hd_connected: "Realistische Online-KI ist aktiv", hd_disconnect: "Trennen", hd_step1: "Erstelle ein kostenloses Konto und bestätige deine E-Mail:", hd_step2: "Erstelle ein Token: wähle „Read“, gib einen beliebigen Namen ein, tippe auf Create und kopiere es:", hd_step3: "Füge das Token unten ein und tippe auf Speichern.", hd_token_ph: "Token einfügen (beginnt mit hf_)", hd_save: "Speichern", hd_bad_token: "Das sieht nicht wie ein Hugging-Face-Token aus. Es beginnt mit hf_.", hd_checking: "Konto wird geprüft…", hd_rejected: "Hugging Face hat dieses Token nicht akzeptiert. Kopiere es erneut und füge es hier ein.", hd_uploading: "Foto wird an die Online-KI gesendet…", hd_waiting: "Warte auf die Online-KI…", hd_painting: "Die Online-KI malt die Ränder ({k} von {n})…", hd_quota: "Die kostenlose Online-KI-Zeit für heute ist aufgebraucht, daher wurde die Handy-KI verwendet. Sie erneuert sich 24 Stunden nach deiner ersten Nutzung heute.", hd_failed: "Die Online-KI war nicht erreichbar, daher wurde die Handy-KI verwendet.",
+      hd_title: "Realistische KI-Füllung (kostenlos)", hd_body: "Verbinde ein kostenloses Hugging-Face-Konto, um eine große Online-KI zu nutzen, die scharfe, realistische Ränder malt. Kostenlose Konten haben etwa 5 Minuten KI-Zeit pro Tag, je nach Größe rund 5 bis 25 Fotos. Dein Foto wird zur Verarbeitung an Hugging Face gesendet.", hd_connect: "Kostenloses Konto verbinden", hd_connected: "Realistische Online-KI ist aktiv", hd_disconnect: "Trennen", hd_step1: "Erstelle ein kostenloses Konto und bestätige deine E-Mail:", hd_step2: "Erstelle ein Token: wähle „Read“, gib einen beliebigen Namen ein, tippe auf Create und kopiere es:", hd_step3: "Füge das Token unten ein und tippe auf Speichern.", hd_token_ph: "Token einfügen (beginnt mit hf_)", hd_save: "Speichern", hd_bad_token: "Das sieht nicht wie ein Hugging-Face-Token aus. Es beginnt mit hf_.", hd_checking: "Konto wird geprüft…", hd_rejected: "Hugging Face hat dieses Token nicht akzeptiert. Kopiere es erneut und füge es hier ein.", hd_uploading: "Foto wird an die Online-KI gesendet…", hd_waiting: "Warte auf die Online-KI…", hd_painting: "Die Online-KI malt die Ränder ({k} von {n})…", hd_quota: "Die kostenlose Online-KI-Zeit für heute ist aufgebraucht, daher wurde die Handy-KI verwendet. Sie erneuert sich 24 Stunden nach deiner ersten Nutzung heute.", hd_failed: "Die Online-KI war nicht erreichbar, daher wurde die Handy-KI verwendet.",
       ai: "KI-Füllung", ai_hint: "KI-Füllung: malt, wie die Szene weitergehen würde. Läuft auf deinem Handy, kostenlos.", ai_unavailable: "Die KI-Füllung funktioniert in der installierten App, nicht in dieser Vorschau.", ai_dl_title: "KI einmalig herunterladen", ai_dl_body: "Die KI-Füllung braucht einen einmaligen Download von etwa 90 MB. Nutze WLAN. Danach funktioniert sie offline. Jedes Foto dauert etwa eine Minute.", ai_dl_ok: "Herunterladen", not_now: "Nicht jetzt", ai_downloading: "KI wird heruntergeladen… {p} %", ai_loading: "KI wird gestartet…", ai_filling: "Die KI malt die Ränder ({k} von {n}). Etwa 15 Sekunden pro Schritt…", ai_video: "Die KI bereitet die Videoränder vor ({k} von {n})…", ai_failed: "Die KI konnte auf diesem Handy nicht laufen, daher wurde ein einfarbiger Streifen verwendet.", ai_declined: "Wähle eine andere Streifenfarbe oder lade die KI herunter, um die KI-Füllung zu nutzen.",
       install: "Installieren", language: "Sprache",
       h1: "Das ganze Foto posten. Nichts abgeschnitten.",
@@ -490,8 +495,9 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
       ios_title: "Uncrop zum Home-Bildschirm hinzufügen", ios1: "Tippe in Safari auf den Teilen-Button.", ios2: "Tippe auf „Zum Home-Bildschirm“.", ios3: "Tippe auf „Hinzufügen“. Uncrop öffnet sich dann wie jede App und funktioniert offline.", got_it: "Verstanden"
     },
     it: {
+      hd_section: "Parte {s} di {m}: {msg}",
       hd_quota_plain: "Il tempo gratuito di IA online di oggi è finito, quindi è stata usata una striscia semplice. Si rinnova 24 ore dopo il tuo primo utilizzo di oggi.", hd_failed_plain: "Non è stato possibile raggiungere l'IA online, quindi è stata usata una striscia semplice.",
-      hd_title: "Riempimento IA realistico (gratis)", hd_body: "Collega un account Hugging Face gratuito per usare una grande IA online che dipinge bordi nitidi e realistici. Gli account gratuiti hanno circa 5 minuti di IA al giorno, circa 15–30 foto. La tua foto viene inviata a Hugging Face per l'elaborazione.", hd_connect: "Collega account gratuito", hd_connected: "L'IA realistica online è attiva", hd_disconnect: "Scollega", hd_step1: "Crea un account gratuito e conferma la tua email:", hd_step2: "Crea un token: scegli «Read», dagli un nome qualsiasi, tocca Create e copialo:", hd_step3: "Incolla il token qui sotto e tocca Salva.", hd_token_ph: "Incolla il tuo token (inizia con hf_)", hd_save: "Salva", hd_bad_token: "Non sembra un token Hugging Face. Inizia con hf_.", hd_checking: "Verifica dell'account…", hd_rejected: "Hugging Face non ha accettato quel token. Copialo di nuovo e incollalo qui.", hd_uploading: "Invio della foto all'IA online…", hd_waiting: "In attesa dell'IA online…", hd_painting: "L'IA online sta dipingendo i bordi ({k} di {n})…", hd_quota: "Il tempo gratuito di IA online di oggi è finito, quindi è stata usata l'IA del telefono. Si rinnova 24 ore dopo il tuo primo utilizzo di oggi.", hd_failed: "Non è stato possibile raggiungere l'IA online, quindi è stata usata l'IA del telefono.",
+      hd_title: "Riempimento IA realistico (gratis)", hd_body: "Collega un account Hugging Face gratuito per usare una grande IA online che dipinge bordi nitidi e realistici. Gli account gratuiti hanno circa 5 minuti di IA al giorno, circa 5–25 foto a seconda delle dimensioni. La tua foto viene inviata a Hugging Face per l'elaborazione.", hd_connect: "Collega account gratuito", hd_connected: "L'IA realistica online è attiva", hd_disconnect: "Scollega", hd_step1: "Crea un account gratuito e conferma la tua email:", hd_step2: "Crea un token: scegli «Read», dagli un nome qualsiasi, tocca Create e copialo:", hd_step3: "Incolla il token qui sotto e tocca Salva.", hd_token_ph: "Incolla il tuo token (inizia con hf_)", hd_save: "Salva", hd_bad_token: "Non sembra un token Hugging Face. Inizia con hf_.", hd_checking: "Verifica dell'account…", hd_rejected: "Hugging Face non ha accettato quel token. Copialo di nuovo e incollalo qui.", hd_uploading: "Invio della foto all'IA online…", hd_waiting: "In attesa dell'IA online…", hd_painting: "L'IA online sta dipingendo i bordi ({k} di {n})…", hd_quota: "Il tempo gratuito di IA online di oggi è finito, quindi è stata usata l'IA del telefono. Si rinnova 24 ore dopo il tuo primo utilizzo di oggi.", hd_failed: "Non è stato possibile raggiungere l'IA online, quindi è stata usata l'IA del telefono.",
       ai: "Riempimento IA", ai_hint: "Riempimento IA: dipinge come continuerebbe la scena. Funziona sul tuo telefono, gratis.", ai_unavailable: "Il riempimento IA funziona nell'app installata, non in questa anteprima.", ai_dl_title: "Scarica l'IA una volta", ai_dl_body: "Il riempimento IA richiede un download unico di circa 90 MB. Usa il Wi-Fi. Poi funziona offline. Ogni foto richiede circa un minuto.", ai_dl_ok: "Scarica", not_now: "Non ora", ai_downloading: "Download dell'IA… {p}%", ai_loading: "Avvio dell'IA…", ai_filling: "L'IA sta dipingendo i bordi ({k} di {n}). Circa 15 secondi ciascuno…", ai_video: "L'IA sta preparando i bordi del video ({k} di {n})…", ai_failed: "L'IA non è riuscita a funzionare su questo telefono, quindi è stata usata una striscia semplice.", ai_declined: "Scegli un altro colore della striscia o scarica l'IA per usare il riempimento IA.",
       install: "Installa", language: "Lingua",
       h1: "Pubblica la foto intera. Niente tagli.",
@@ -1057,14 +1063,10 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
     return out;
   }
 
-  async function hdOutpaint(it, W, H, onPhase) {
+  // One request to the online AI: send `upBlob`, get back a tw×th picture with the photo placed by `alignment`
+  // and the rest painted. `ov` says which photo edges it may blend into ({l,r,t,b}).
+  async function hdCall(upBlob, tw, th, alignment, ov, onPhase) {
     const auth = { Authorization: "Bearer " + hdToken };
-    const { tw, th } = hdSize(W, H);
-    // send the photo at the size it will occupy in the online AI's frame (smaller upload, same result)
-    const fit = Math.min(1, tw / it.w, th / it.h);
-    const uc = document.createElement("canvas"); uc.width = Math.round(it.w * fit); uc.height = Math.round(it.h * fit);
-    const ux = uc.getContext("2d"); ux.imageSmoothingQuality = "high"; ux.drawImage(it.src, 0, 0, uc.width, uc.height);
-    const upBlob = await new Promise(r => uc.toBlob(r, "image/jpeg", 0.95));
     const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 240000);
     try {
       onPhase("hd_uploading");
@@ -1072,7 +1074,7 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
       let r = await fetch(HD_ROOT + "/gradio_api/upload", { method: "POST", headers: auth, body: fd, signal: ctl.signal });
       if (!r.ok) throw new Error(`upload ${r.status}`);
       const up = await r.json(), path = Array.isArray(up) ? up[0] : up;
-      const data = [{ path, orig_name: "photo.jpg", meta: { _type: "gradio.FileData" } }, tw, th, 10, 8, "Full", 50, "", "Middle", true, true, true, true];
+      const data = [{ path, orig_name: "photo.jpg", meta: { _type: "gradio.FileData" } }, tw, th, 10, 8, "Full", 50, "", alignment, !!ov.l, !!ov.r, !!ov.t, !!ov.b];
       r = await fetch(HD_ROOT + "/gradio_api/call/infer", { method: "POST", headers: { ...auth, "Content-Type": "application/json" }, body: JSON.stringify({ data }), signal: ctl.signal });
       if (!r.ok) throw new Error(`start ${r.status} ${(await r.text()).slice(0, 120)}`);
       const { event_id } = await r.json();
@@ -1103,9 +1105,158 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
       const url = f.url || `${HD_ROOT}/gradio_api/file=${f.path}`;
       r = await fetch(url, { headers: auth, signal: ctl.signal });
       if (!r.ok) throw new Error(`image ${r.status}`);
-      const bmp = await createImageBitmap(await r.blob());
-      return bmp;
+      return await createImageBitmap(await r.blob());
     } finally { clearTimeout(timer); }
+  }
+  const toJpeg = (c) => new Promise(r => c.toBlob(r, "image/jpeg", 0.95));
+  const r8 = (v) => Math.round(v / 8) * 8;
+  const mkCanvas = (w, h) => { const c = document.createElement("canvas"); c.width = Math.max(1, w); c.height = Math.max(1, h); return c; };
+
+  // Whole picture in one request (used when the photo is small enough that this loses little detail).
+  async function hdOutpaint(it, W, H, onPhase) {
+    const { tw, th } = hdSize(W, H);
+    const fit = Math.min(1, tw / it.w, th / it.h);
+    const uc = mkCanvas(Math.round(it.w * fit), Math.round(it.h * fit));
+    const ux = uc.getContext("2d"); ux.imageSmoothingQuality = "high"; ux.drawImage(it.src, 0, 0, uc.width, uc.height);
+    return hdCall(await toJpeg(uc), tw, th, "Middle", { l: true, r: true, t: true, b: true }, onPhase);
+  }
+
+  // The online AI works at most 1536 px. On a big photo, one request means painting the edges at a fraction of
+  // the photo's resolution and stretching them (blurry). Instead, paint each strip in overlapping sections, each
+  // sent at close to the photo's own resolution, and blend the sections together.
+  const HD_TILE = 2304;
+  function hdTiles(len) {
+    if (len <= HD_TILE) return { n: 1, T: len };
+    const ov = Math.round(HD_TILE * 0.15), n = Math.ceil((len - ov) / (HD_TILE - ov));
+    return { n, T: Math.ceil((len + (n - 1) * ov) / n) };
+  }
+
+  // Paints one strip in sections. `canvas` holds the photo at `box`; `side` is left/right/top/bottom.
+  async function hdStrip(canvas, box, side, onPhase, tileInfo) {
+    const { dx, dy, dw, dh } = box, W = canvas.width, H = canvas.height;
+    const vert = side === "left" || side === "right";          // strip runs top-to-bottom
+    const S = side === "left" ? dx : side === "right" ? W - dx - dw : side === "top" ? dy : H - dy - dh;
+    if (S <= 0) return;
+    const len = vert ? H : W, across = vert ? dw : dh;
+    const { n, T } = hdTiles(len);
+    const ctx = canvas.getContext("2d");
+    let prevEnd = null;
+    for (let i = 0; i < n; i++) {
+      if (cancelReq) throw new Error("canceled");
+      tileInfo.k++;
+      const a0 = n === 1 ? 0 : Math.round(i * (len - T) / (n - 1));        // start along the strip
+      // scale so the request fits the AI's 720–1536 px range
+      const along = Math.min(1536, Math.max(720, r8(T * Math.min(1, 1536 / T))));
+      const k = along / T;
+      const sOut = Math.max(8, Math.round(S * k));
+      const cw = Math.max(1, Math.min(across, Math.floor(1536 / k) - S - 8, T - S));  // photo context next to the strip
+      const uAcross = Math.max(1, Math.round(cw * k));
+      const tAcross = Math.min(1536, Math.max(720, r8(uAcross + sOut)));
+      // photo crop next to this strip, scaled by k
+      let cx, cy, cwid, chei;
+      if (side === "left") { cx = dx; cy = a0; cwid = cw; chei = T; }
+      else if (side === "right") { cx = dx + dw - cw; cy = a0; cwid = cw; chei = T; }
+      else if (side === "top") { cx = a0; cy = dy; cwid = T; chei = cw; }
+      else { cx = a0; cy = dy + dh - cw; cwid = T; chei = cw; }
+      const uc = vert ? mkCanvas(uAcross, along) : mkCanvas(along, uAcross);
+      const ux = uc.getContext("2d", { willReadFrequently: true }); ux.imageSmoothingQuality = "high";
+      ux.drawImage(canvas, cx, cy, cwid, chei, 0, 0, uc.width, uc.height);
+      const tw = vert ? tAcross : along, th = vert ? along : tAcross;
+      const align = { left: "Right", right: "Left", top: "Bottom", bottom: "Top" }[side];
+      const ov = { l: side === "left", r: side === "right", t: side === "top", b: side === "bottom" };
+      const bmp = await hdCall(await toJpeg(uc), tw, th, align, ov, (key, v) => onPhase(key, v, tileInfo));
+      // where the photo sits in the answer, and the strip right next to it
+      const ow = bmp.width, oh = bmp.height, sx = ow / tw, sy = oh / th;     // (the answer should be tw×th)
+      let mx = 0, my = 0;
+      if (side === "left") mx = tw - uc.width; if (side === "top") my = th - uc.height;
+      if (vert) my = Math.round((th - uc.height) / 2); else mx = Math.round((tw - uc.width) / 2);
+      if (side === "left") mx = tw - uc.width; if (side === "top") my = th - uc.height;
+      let rx, ry, rw, rh;                                                    // strip in the answer
+      if (side === "left") { rx = mx - sOut; ry = my; rw = sOut; rh = uc.height; }
+      else if (side === "right") { rx = mx + uc.width; ry = my; rw = sOut; rh = uc.height; }
+      else if (side === "top") { rx = mx; ry = my - sOut; rw = uc.width; rh = sOut; }
+      else { rx = mx; ry = my + uc.height; rw = uc.width; rh = sOut; }
+      const sc = mkCanvas(rw, rh), sctx = sc.getContext("2d", { willReadFrequently: true });
+      sctx.drawImage(bmp, rx * sx, ry * sy, rw * sx, rh * sy, 0, 0, rw, rh);
+      // the AI's version of the photo edge vs the real one → per-position color correction for this section
+      const band = Math.max(3, Math.round((vert ? uc.width : uc.height) * 0.03)), N = 32;
+      const prof = (img, x, y, w, h, sxx = 1, syy = 1) => { const c = mkCanvas(vert ? 1 : N, vert ? N : 1).getContext("2d", { willReadFrequently: true }); c.imageSmoothingQuality = "high"; c.drawImage(img, x * sxx, y * syy, w * sxx, h * syy, 0, 0, vert ? 1 : N, vert ? N : 1); return c.getImageData(0, 0, vert ? 1 : N, vert ? N : 1).data; };
+      let gx, gy, gw, gh, ux0, uy0;
+      if (side === "left") { gx = mx; gy = my; gw = band; gh = uc.height; ux0 = 0; uy0 = 0; }
+      else if (side === "right") { gx = mx + uc.width - band; gy = my; gw = band; gh = uc.height; ux0 = uc.width - band; uy0 = 0; }
+      else if (side === "top") { gx = mx; gy = my; gw = uc.width; gh = band; ux0 = 0; uy0 = 0; }
+      else { gx = mx; gy = my + uc.height - band; gw = uc.width; gh = band; ux0 = 0; uy0 = uc.height - band; }
+      const gen = prof(bmp, gx, gy, gw, gh, sx, sy), real = prof(uc, ux0, uy0, gw, gh);
+      const id = sctx.getImageData(0, 0, rw, rh), d = id.data;
+      for (let y = 0; y < rh; y++) for (let x = 0; x < rw; x++) {
+        const t = vert ? y / rh : x / rw, dist = side === "left" ? 1 - x / rw : side === "right" ? x / rw : side === "top" ? 1 - y / rh : y / rh;
+        const fi = Math.min(N - 1, Math.max(0, t * N - 0.5)), j0 = Math.floor(fi), j1 = Math.min(N - 1, j0 + 1), a = fi - j0, w = 1 - 0.4 * dist, q = (y * rw + x) * 4;
+        for (let c = 0; c < 3; c++) d[q + c] += w * ((real[j0 * 4 + c] - gen[j0 * 4 + c]) * (1 - a) + (real[j1 * 4 + c] - gen[j1 * 4 + c]) * a);
+      }
+      sctx.putImageData(id, 0, 0);
+      if (bmp.close) bmp.close();
+      // place it, fading in over the previous section
+      let dx0, dy0, dW, dH;
+      if (side === "left") { dx0 = 0; dy0 = a0; dW = S; dH = T; }
+      else if (side === "right") { dx0 = dx + dw; dy0 = a0; dW = S; dH = T; }
+      else if (side === "top") { dx0 = a0; dy0 = 0; dW = T; dH = S; }
+      else { dx0 = a0; dy0 = dy + dh; dW = T; dH = S; }
+      const tmp = mkCanvas(dW, dH), tc = tmp.getContext("2d"); tc.imageSmoothingQuality = "high";
+      tc.drawImage(sc, 0, 0, dW, dH);
+      const ovl = prevEnd === null ? 0 : prevEnd - a0;
+      if (ovl > 0) {
+        const g = vert ? tc.createLinearGradient(0, 0, 0, ovl) : tc.createLinearGradient(0, 0, ovl, 0);
+        g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,1)");
+        tc.globalCompositeOperation = "destination-in"; tc.fillStyle = g; tc.fillRect(0, 0, dW, dH);
+      }
+      ctx.drawImage(tmp, dx0, dy0);
+      prevEnd = a0 + T;
+    }
+  }
+
+  // Makes the AI part's fine texture match the photo: a little sharpening where it was enlarged, then camera-like
+  // grain so it doesn't look smoother than the real photo next to it.
+  function matchTexture(canvas, box, upscale) {
+    const { dx, dy, dw, dh } = box, W = canvas.width, H = canvas.height;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    const hpStd = (x, y, w, h) => {   // spread of fine detail (pixel minus its local average) in a region
+      if (w < 4 || h < 4) return 0;
+      const sw = Math.min(w, 400), shh = Math.min(h, 400), x0 = x + Math.floor((w - sw) / 2), y0 = y + Math.floor((h - shh) / 2);
+      const c = mkCanvas(sw, shh).getContext("2d", { willReadFrequently: true });
+      c.drawImage(canvas, x0, y0, sw, shh, 0, 0, sw, shh);   // sample the middle of the region
+      const d = c.getImageData(0, 0, sw, shh).data; let sum = 0, sum2 = 0, n = 0;
+      for (let yy = 1; yy < shh - 1; yy += 2) for (let xx = 1; xx < sw - 1; xx += 2) {
+        const L = (i) => 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+        const i = (yy * sw + xx) * 4, v = L(i) - (L(i - 4) + L(i + 4) + L(i - sw * 4) + L(i + sw * 4)) / 4;
+        sum += v; sum2 += v * v; n++;
+      }
+      return n ? Math.sqrt(Math.max(0, sum2 / n - (sum / n) ** 2)) : 0;
+    };
+    const strips = [];
+    // [strip x, y, w, h, nearby photo region x, y, w, h]
+    if (dx > 0) strips.push([0, 0, dx, H, dx, 0, Math.min(dw, 400), H], [dx + dw, 0, W - dx - dw, H, dx + dw - Math.min(dw, 400), 0, Math.min(dw, 400), H]);
+    if (dy > 0) strips.push([0, 0, W, dy, 0, dy, W, Math.min(dh, 400)], [0, dy + dh, W, H - dy - dh, 0, dy + dh - Math.min(dh, 400), W, Math.min(dh, 400)]);
+    for (const [x, y, w, h, rx, ry, rw, rh] of strips) {
+      if (w <= 0 || h <= 0) continue;
+      const id = ctx.getImageData(x, y, w, h), d = id.data;
+      if (upscale > 1.15) {   // gentle unsharp mask
+        const f = Math.min(4, upscale), bw = Math.max(1, Math.round(w / f)), bh = Math.max(1, Math.round(h / f));
+        const b = mkCanvas(bw, bh).getContext("2d"); b.imageSmoothingQuality = "high"; b.drawImage(canvas, x, y, w, h, 0, 0, bw, bh);
+        const u = mkCanvas(w, h).getContext("2d", { willReadFrequently: true }); u.imageSmoothingQuality = "high"; u.drawImage(b.canvas, 0, 0, w, h);
+        const bl = u.getImageData(0, 0, w, h).data, amt = Math.min(0.8, 0.35 * (upscale - 1));
+        for (let i = 0; i < d.length; i += 4) for (let c = 0; c < 3; c++) d[i + c] += amt * (d[i + c] - bl[i + c]);
+      }
+      ctx.putImageData(id, x, y);
+      const want = hpStd(rx, ry, rw, rh), have = hpStd(x, y, w, h);
+      const add = Math.min(8, Math.sqrt(Math.max(0, want * want - have * have)) * 0.8);
+      if (add < 0.5) continue;
+      const id2 = ctx.getImageData(x, y, w, h), e = id2.data;
+      for (let i = 0; i < e.length; i += 4) {   // fine luminance grain, like a camera sensor
+        const g = add * Math.sqrt(-2 * Math.log(Math.random() + 1e-9)) * Math.cos(6.2831853 * Math.random());
+        e[i] += g; e[i + 1] += g; e[i + 2] += g;
+      }
+      ctx.putImageData(id2, x, y);
+    }
   }
 
   // The online AI may shift colors slightly; measure that shift on the photo's own edge (its version vs the real
@@ -1154,16 +1305,29 @@ button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px soli
     if (wantsHD(p)) {
       try {
         const box = placeBox(it.w, it.h, p.W, p.H);
-        const bmp = await hdOutpaint(it, p.W, p.H, (key, v) => onStep(0, 0, key, v));
-        const ctx = c.getContext("2d"); ctx.imageSmoothingQuality = "high";
-        ctx.drawImage(bmp, 0, 0, p.W, p.H);
-        if (bmp.close) bmp.close();
-        seamMatch(c, it.src, it.w, it.h, box);
+        const len = box.dx > 0 ? p.H : p.W;
+        if (len <= HD_TILE) {
+          const bmp = await hdOutpaint(it, p.W, p.H, (key, v) => onStep(0, 0, key, v));
+          const ctx = c.getContext("2d"); ctx.imageSmoothingQuality = "high";
+          ctx.drawImage(bmp, 0, 0, p.W, p.H);
+          const up = p.W / bmp.width;
+          if (bmp.close) bmp.close();
+          seamMatch(c, it.src, it.w, it.h, box);
+          render2(c, it.src, it.w, it.h, box);
+          matchTexture(c, box, up);
+        } else {
+          const { n, T } = hdTiles(len), tileInfo = { k: 0, n: 2 * n };
+          const phase = (key, v, ti) => onStep(0, 0, "hd_section", { s: ti.k, m: ti.n, msg: t(key, v) });
+          for (const side of (box.dx > 0 ? ["left", "right"] : ["top", "bottom"])) await hdStrip(c, box, side, phase, tileInfo);
+          render2(c, it.src, it.w, it.h, box);
+          matchTexture(c, box, T / Math.min(1536, Math.max(720, r8(T * Math.min(1, 1536 / T)))));
+        }
         render2(c, it.src, it.w, it.h, box); // the real photo goes back on top, pixel-exact
         painted = true; hdUsed = true;
       } catch (e) {
         if (cancelReq) return null;
         const m = errText(e);
+        // keep the photo clean if a later section failed
         if (/^QUOTA/.test(m)) hdBlocked = true;
         hdErr = m; render(c.getContext("2d"), it.src, it.w, it.h, p.W, p.H);
       }
